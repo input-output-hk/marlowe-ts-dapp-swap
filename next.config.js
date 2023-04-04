@@ -1,10 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  transpilePackages: ['marlowe-ts-sdk'],
+  reactStrictMode: false,
   webpack: function (config, options) {
     config.experiments = {
       asyncWebAssembly: true,
     };
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ["@svgr/webpack"]
+    });
     return config;
   },
 };

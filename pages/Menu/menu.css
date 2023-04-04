@@ -1,0 +1,8 @@
+
+img.ui.image.walletIcon
+    { width:20px;
+      height:20px;
+      margin-right: .25em;
+      display: inline-block;
+      border-radius: 500rem;
+    }
