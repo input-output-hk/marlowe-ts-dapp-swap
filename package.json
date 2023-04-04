@@ -14,16 +14,24 @@
   "dependencies": {
     "@meshsdk/core": "1.2.0-beta.4",
     "@meshsdk/react": "1.1.1",
+    "@svgr/webpack" : "7.0.0",
     "next": "13.0.2",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "@types/react": "18.0.25",
+    "@types/react-dom": "18.0.8",
+    "react": "^18.2.0",
+    "react-scripts" : "^5.0.1",
+    "react-dom": "^18.2.0",
+    "semantic-ui-css": "^2.5.0",
+    "semantic-ui-react": "^2.1.4"
   },
   "devDependencies": {
+    "@nhenin/marlowe-ts-sdk": "^0.0.1",
     "@types/node": "18.11.9",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.8",
     "eslint": "8.27.0",
     "eslint-config-next": "13.0.2",
+    "mini.css": "3.0.1",
     "typescript": "4.8.4"
   }
 }

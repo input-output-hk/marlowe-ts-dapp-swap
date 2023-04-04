@@ -1,61 +1,43 @@
 import Head from "next/head";
-import { CardanoWallet, MeshBadge } from "@meshsdk/react";
+
+import MyMenu from "./Menu/Menu";
+import { Container } from "semantic-ui-react";
+import { CardanoWallet } from "@meshsdk/react";
 
 export default function Home() {
   return (
     <div className="container">
       <Head>
-        <title>Mesh App on Cardano</title>
-        <meta name="description" content="A Cardano dApp powered my Mesh" />
-        <link
-          rel="icon"
-          href="https://meshjs.dev/favicon/favicon-32x32.png"
-        />
-        <link
-          href="https://meshjs.dev/css/template.css"
-          rel="stylesheet"
-          key="mesh-demo"
-        />
+        <title>Ada/Djed Swap DApp</title>
+        <meta name="description" content="A Cardano dApp powered my Marlowe" />
+
       </Head>
+      <main>
 
-      <main className="main">
-        <h1 className="title">
-          <a href="https://meshjs.dev/">Mesh</a> Next.js
-        </h1>
-
-        <div className="demo">
-          <CardanoWallet />
-        </div>
-
-        <div className="grid">
-          <a href="https://meshjs.dev/apis" className="card">
-            <h2>Documentation</h2>
-            <p>
-              Our documentation provide live demos and code samples; great
-              educational tool for learning how Cardano works.
-            </p>
-          </a>
-
-          <a href="https://meshjs.dev/guides" className="card">
-            <h2>Guides</h2>
-            <p>
-              Whether you are launching a new NFT project or ecommerce store,
-              these guides will help you get started.
-            </p>
-          </a>
-
-          <a href="https://meshjs.dev/react" className="card">
-            <h2>React components</h2>
-            <p>
-              Useful React UI components and hooks, seamlessly integrate them
-              into your app, and bring the user interface to life.
-            </p>
-          </a>
-        </div>
+      <Container > 
+        <MyMenu/>
+      </Container>
+      <Container text  > <p>
+        Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
+        ligula eget dolor. Aenean massa strong. Cum sociis natoque penatibus et
+        magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis,
+        ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa
+        quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget,
+        arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.
+        Nullam dictum felis eu pede link mollis pretium. Integer tincidunt. Cras
+        dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend
+        tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac,
+        enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus.
+        Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean
+        imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper
+        ultricies nisi.
+     
+      </p> </Container>
+     
       </main>
 
-      <footer className="footer">
-        <MeshBadge dark={true} />
+      <footer>
+        <Container textAlign="center"> <p>Powered By Marlowe</p> </Container>
       </footer>
     </div>
   );
