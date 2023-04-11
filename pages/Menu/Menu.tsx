@@ -24,11 +24,7 @@ export default class MyMenu extends Component {
         <Menu.Item>
           <Logo />
         </Menu.Item>
-        <Menu.Item
-          name='Welcome'
-          active={activeItem === 'home'}
-          onClick={this.handleItemClick}
-        />
+        <Menu.Item> <h3>Swaps Demonstration powered by Marlowe</h3></Menu.Item>
         <Menu.Menu position='right'>
           <Menu.Item>
             <Input icon='search' placeholder='Search...' />
