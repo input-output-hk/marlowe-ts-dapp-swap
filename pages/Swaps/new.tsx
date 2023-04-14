@@ -7,7 +7,7 @@ import * as O from 'fp-ts/Option'
 import { CardanoWallet, WalletContext, useLovelace, useNetwork, useWallet, useWalletList,  } from '@meshsdk/react'
 
 import { Segment, Tab } from 'semantic-ui-react'
-
+import { useFieldArray, useForm } from "react-hook-form";
 import {
   Button,
   Checkbox,
@@ -18,37 +18,77 @@ import {
   TextArea,
 } from 'semantic-ui-react'
 
-const options = [
-  { key: '1h', text: '1 hour', value: '1h' },
-  { key: '3h', text: '3 hours', value: '3h' },
-  { key: '1d', text: '1 d', value: '1d' },
-  { key: '1w', text: '1 week', value: '1w' },
-]
-export class NewSwap extends Component {
-  state = {}
 
-  handleChange = (e, { value }) => this.setState({ value })
 
-  render() {
-    const { value } = this.state
-    return (<>
+export const NewSwap = (onValidSubmission) => {
+  type Currency = 'Djed' | '₳'
+  const [amount ,SetAmount] = useState<number>(0)
+  const [currency ,SetCurrency] = useState<Currency>('Djed')
+  const [amountToSwap ,SetAmountToSwap] = useState<number>(0)
+  const [currencyToSwap ,SetCurrencyToSwap] = useState<Currency>('₳')
+  const ratioDjedToAda : number = 3
+  const updateAmountAndCurrencyToSwap = (event) => {
+    const newCurrency = event.target.value
+    SetCurrency (newCurrency)
+    if(newCurrency == 'Djed') {
+      SetAmountToSwap(amount * ratioDjedToAda);
+      SetCurrencyToSwap('₳')
+    } else {
+      SetAmountToSwap(amount / ratioDjedToAda)
+      SetCurrencyToSwap('Djed')
+    }
+  }
+  const submit = async (event) => {
+    event.preventDefault();
+
+    console.log(event);
+  };
+  console.log ("Render New Swap")
+  return (<>
       <br/>
-      <Form >
+      <Form onSubmit={submit}>
         <Form.Group >
-          <Form.Input label='Adressed to' placeholder='Recipient address' width={10} />
+          <Form.Input 
+            id='recipient' 
+            label='Adressed to' 
+            placeholder='Recipient address' 
+            width={10} />
         
         </Form.Group>  
         <Form.Group inline >
-          <Form.Select
-            label='Valid for'
-            options={options}
-            placeholder='1 hour'
+          <Form.Input
+            label='Deadline'
+            type='datetime-local'
           />
         </Form.Group>
-        <Form.Group inline><label>Rate :</label> 1 djed = 2 ₳ </Form.Group>
+        
+        <Form.Group inline > 
+          <Form.Input 
+              label="Amount" 
+              type='number' 
+              step='0' 
+              value ={amount} 
+              width={4}  />
+          <Form.Field  control='select' value={currency} onChange={updateAmountAndCurrencyToSwap}  >
+            <option value='Djed' >Djed</option>
+            <option value='₳'>₳</option>
+          </Form.Field> 
+          <Icon name='angle right' color='grey' size='large' /> 
+          <Form.Input  
+            value={amountToSwap}   
+            type='number' 
+            readOnly  
+            width={4}  />
+          <Form.Input  
+            value={currencyToSwap} 
+            readOnly 
+            width={2} />
+          <span> (* ratio 1 Djed = {ratioDjedToAda} ₳  )</span>
+        </Form.Group>
 
         <Form.Field
           control={TextArea}
+          id='note'
           label='Note'
           placeholder='Add a note about you swap ...'
         />
@@ -62,7 +102,8 @@ export class NewSwap extends Component {
       </Form>
       </>
     )
-  }
 }
+
+
 
 
