@@ -7,8 +7,9 @@ import * as O from 'fp-ts/Option'
 import { CardanoWallet, WalletContext, useLovelace, useNetwork, useWallet, useWalletList,  } from '@meshsdk/react'
 
 import { Image } from 'semantic-ui-react'
-import { BrowserWallet } from '@meshsdk/core'
+import { AssetExtended, BrowserWallet } from '@meshsdk/core'
 import { constant, pipe } from 'fp-ts/lib/function'
+import { Connected, useWalletState } from '../Hooks/Wallet'
 
 
 export default class MyMenu extends Component {
@@ -24,11 +25,8 @@ export default class MyMenu extends Component {
         <Menu.Item>
           <Logo />
         </Menu.Item>
-        <Menu.Item> <h3>Swaps Demonstration powered by Marlowe</h3></Menu.Item>
+        <Menu.Item> <h3>P2P Swaps </h3></Menu.Item>
         <Menu.Menu position='right'>
-          <Menu.Item>
-            <Input icon='search' placeholder='Search...' />
-          </Menu.Item>
           <ConnectionWallet /> 
         </Menu.Menu>
       </Menu>
@@ -77,7 +75,15 @@ export const ConnectWallet = ({ state }) => {
 
 
 export const ConnectedWallet = ({state}) => {
-  const { disconnect, extensionSelected , lovelaceBalance , isMainnnet} = state;
+  const connected : Connected = state
+  const { disconnect, extensionSelected , assetBalances , isMainnnet} = connected;
+  console.log('state' , state)
+  const lovelaceBalance = 
+      pipe(assetBalances 
+          ,A.findFirst((v) => v.unit === 'lovelace') 
+          ,O.map((v) => parseInt (v.quantity,10))
+          ,O.getOrElse(() => 0))
+
   const adas = (Math.trunc(lovelaceBalance / 1_000_000))
   const decimalADAs = (lovelaceBalance % 1_000_000)
   return  lovelaceBalance > 0 ? (
@@ -114,69 +120,69 @@ export const ConnectedWallet = ({state}) => {
 };
 
 
-type WalletBroswerExtension = {
-    name: string,
-    icon: string,
-    version: string
-}
+// type WalletBroswerExtension = {
+//     name: string,
+//     icon: string,
+//     version: string
+// }
 
-type WalletState 
-  = Connected
-  | Connecting
-  | Disconnected
+// type WalletState 
+//   = Connected
+//   | Connecting
+//   | Disconnected
 
-type Connected = { type: 'connected',
-                   isMainnnet : Boolean 
-                   walletsdk : BrowserWallet,
-                   lovelaceBalance : number,
-                   extensionSelected : WalletBroswerExtension
-                   disconnect : () => void
-                 } 
-type Connecting = { type: 'connecting' }
+// type Connected = { type: 'connected',
+//                    isMainnnet : Boolean 
+//                    walletsdk : BrowserWallet,
+//                    lovelaceBalance : number,
+//                    extensionSelected : WalletBroswerExtension
+//                    disconnect : () => void
+//                  } 
+// type Connecting = { type: 'connecting' }
 
-type Disconnected = { type: 'disconnected' 
-                      connect: (walletName: string) => Promise<void>
-                      installedExtensions : WalletBroswerExtension []
-                    }
+// type Disconnected = { type: 'disconnected' 
+//                       connect: (walletName: string) => Promise<void>
+//                       installedExtensions : WalletBroswerExtension []
+//                     }
 
-export const useWalletState : () => WalletState = 
-  () => {
-  const {
-    connectedWalletName,
-    connectedWalletInstance,
-    connectingWallet,
-    hasConnectedWallet,
-    connectWallet,
-    disconnect,
-  } = useContext(WalletContext);
+// export const useWalletState : () => WalletState = 
+//   () => {
+//   const {
+//     connectedWalletName,
+//     connectedWalletInstance,
+//     connectingWallet,
+//     hasConnectedWallet,
+//     connectWallet,
+//     disconnect,
+//   } = useContext(WalletContext);
   
-  const isMainnnet = pipe(useNetwork (), a => a == 1 )
-  const installedExtensions = useInstalledWalletExtensions ()
-  const lovelaceOption = pipe(useLovelace(), a => a != undefined ? O.some(parseInt (a,10)) : O.none)
-  const connectOption 
-    = pipe(  O.Do
-          ,  O.bind ( 'walletSelected' ,  () => pipe (installedExtensions, A.findFirst(w => w.name == connectedWalletName)))
-          ,  O.bind ( 'lovelaceBalance' , () => lovelaceOption) 
-          ,  O.map (({walletSelected,lovelaceBalance}) => ({ type : 'connected' 
-                                      , isMainnnet : isMainnnet
-                                      , walletsdk : connectedWalletInstance
-                                      , extensionSelected : walletSelected
-                                      , lovelaceBalance : lovelaceBalance
-                                      , disconnect : disconnect} as WalletState)))
-  const connecting   = constant ({ type: 'connecting' } as WalletState)
-  const disconnected = constant ({ type: 'disconnected' , installedExtensions : installedExtensions , connect : connectWallet} as WalletState)
-  return pipe
-          ( connectOption
-          ,  O.getOrElse( connectingWallet || (hasConnectedWallet && O.isNone(lovelaceOption)) ? connecting : disconnected))
+//   const isMainnnet = pipe(useNetwork (), a => a == 1 )
+//   const installedExtensions = useInstalledWalletExtensions ()
+//   const lovelaceOption = pipe(useLovelace(), a => a != undefined ? O.some(parseInt (a,10)) : O.none)
+//   const connectOption 
+//     = pipe(  O.Do
+//           ,  O.bind ( 'walletSelected' ,  () => pipe (installedExtensions, A.findFirst(w => w.name == connectedWalletName)))
+//           ,  O.bind ( 'lovelaceBalance' , () => lovelaceOption) 
+//           ,  O.map (({walletSelected,lovelaceBalance}) => ({ type : 'connected' 
+//                                       , isMainnnet : isMainnnet
+//                                       , walletsdk : connectedWalletInstance
+//                                       , extensionSelected : walletSelected
+//                                       , lovelaceBalance : lovelaceBalance
+//                                       , disconnect : disconnect} as WalletState)))
+//   const connecting   = constant ({ type: 'connecting' } as WalletState)
+//   const disconnected = constant ({ type: 'disconnected' , installedExtensions : installedExtensions , connect : connectWallet} as WalletState)
+//   return pipe
+//           ( connectOption
+//           ,  O.getOrElse( connectingWallet || (hasConnectedWallet && O.isNone(lovelaceOption)) ? connecting : disconnected))
 
-};
+// };
 
-export const useInstalledWalletExtensions = () => {
-  const [wallets, setWallets] = useState<WalletBroswerExtension[]>([]);
+// export const useInstalledWalletExtensions = () => {
+//   const [wallets, setWallets] = useState<WalletBroswerExtension[]>([]);
 
-  useEffect(() => {
-    setWallets(BrowserWallet.getInstalledWallets());
-  }, []);
+//   useEffect(() => {
+//     setWallets(BrowserWallet.getInstalledWallets());
+//   }, []);
 
-  return wallets;
-};
+//   return wallets;
+// };
