@@ -5,11 +5,17 @@ import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as O from 'fp-ts/Option'
 import { CardanoWallet, WalletContext, useNetwork, useWallet, useWalletList,  } from '@meshsdk/react'
-
+import * as TE from 'fp-ts/TaskEither'
 import { Image } from 'semantic-ui-react'
-import { AssetExtended, BrowserWallet, resolveFingerprint } from '@meshsdk/core'
+import { AssetExtended, BrowserWallet, DataSignature, resolveFingerprint } from '@meshsdk/core'
 import { constant, pipe } from 'fp-ts/lib/function'
-
+import { HexTransactionWitnessSet, MarloweTxCBORHex } from 'marlowe-ts-sdk-beta/src/runtime/common/textEnvelope'
+import { AxiosRestClient } from 'marlowe-ts-sdk-beta/src/runtime/endpoints'
+import { addressBech32 } from 'marlowe-ts-sdk-beta/src/runtime/common/address'
+import { InitialisePayload } from 'marlowe-ts-sdk-beta/src/runtime/write/command'
+import { DecodingError } from 'marlowe-ts-sdk-beta/src/runtime/common/codec'
+import { ContractDetails } from 'marlowe-ts-sdk-beta/src/runtime/contract/details'
+import {initialise} from 'marlowe-ts-sdk-beta/src/runtime/write/command'
 
 export type WalletBroswerExtension = {
     name: string,
@@ -22,9 +28,12 @@ export type WalletState
   | Connecting
   | Disconnected
 
+export type MeshExtensionSDK = BrowserWallet
+
 export type Connected = { type: 'connected',
                    isMainnnet : Boolean 
-                   walletsdk : BrowserWallet,
+                   marloweSDK : MarloweSDK,
+                   meshExtensionSDK : MeshExtensionSDK
                    assetBalances : AssetExtended[],
                    extensionSelected : WalletBroswerExtension
                    disconnect : () => void
@@ -35,6 +44,55 @@ export type Disconnected = { type: 'disconnected'
                       connect: (walletName: string) => Promise<void>
                       installedExtensions : WalletBroswerExtension []
                     }
+
+const runtimeUrl = 'http://0.0.0.0:33891'  
+
+const getExtensionInstance : (extensionName : string) => Promise<WalletInstance> = (extensionName) => { 
+  console.log("extensionName", extensionName )
+  return window.cardano[extensionName.toLowerCase()].enable()
+  }
+const waitConfirmation : (txHash : string ) => TE.TaskEither<Error,boolean> = (txHash) => TE.of (true) 
+const signMarloweTx : (extensionName : string) => (cborHex :MarloweTxCBORHex) => TE.TaskEither<Error,HexTransactionWitnessSet> =
+  (extensionName) => (cborHex) => 
+    pipe( () => getExtensionInstance (extensionName)
+        , T.chain((extensionInstance) => () => extensionInstance.signTx (cborHex,false))
+        , TE.fromTask
+        )
+
+
+const initialiseWithExtension :
+       (runtimeUrl : string)
+    => (extensionName : string) 
+    => (changeAddress : string, usedAddresses : string[],collaterals : string[])
+    => (payload : InitialisePayload)
+    => TE.TaskEither<Error | DecodingError,ContractDetails>  = 
+  (runtimeUrl) => (extensionName) => (changeAddress,usedAddresses,collaterals) => (payload)  => 
+        initialise 
+              (AxiosRestClient(runtimeUrl)  )
+              (waitConfirmation)
+              (signMarloweTx(extensionName))
+              ({ changeAddress: addressBech32(changeAddress)
+                , usedAddresses: usedAddresses.length == 0 
+                                    ? O.none 
+                                    : pipe( usedAddresses
+                                          , A.map(addressBech32)
+                                          , O.some) 
+                , collateralUTxOs: O.some(collaterals)})
+              (payload)
+  
+export type MarloweSDK = 
+  {initialise : 
+       (changeAddress : string, usedAddresses : string[],collaterals : string[]) 
+    => (payload: InitialisePayload) 
+    => TE.TaskEither<Error | DecodingError, ContractDetails>}   
+
+const buildMarloweSDK : 
+     (runtimeUrl : string) 
+  => (extensionName : string) 
+  => MarloweSDK = 
+  (runtimeUrl) =>  (extensionName) => 
+    ({initialise : initialiseWithExtension (runtimeUrl)(extensionName) })
+                                      
 
 export const useWalletState : () => WalletState = 
   () => {
@@ -57,7 +115,8 @@ export const useWalletState : () => WalletState =
           ,  O.bind ( 'walletSelected' ,  () => pipe (installedExtensions, A.findFirst(w => w.name == connectedWalletName)))
           ,  O.map (({walletSelected}) => ({ type : 'connected' 
                                       , isMainnnet : isMainnnet
-                                      , walletsdk : connectedWalletInstance
+                                      , marloweSDK : buildMarloweSDK(runtimeUrl)(connectedWalletName)
+                                      , meshExtensionSDK : connectedWalletInstance
                                       , extensionSelected : walletSelected
                                       , assetBalances : assetBalances
                                       , disconnect : disconnect} as WalletState)))
@@ -115,3 +174,20 @@ const getAssets = async (connectedWalletInstance :BrowserWallet) => {
 }
 const POLICY_ID_LENGTH = 56;
 const toUTF8 = (hex: string) => Buffer.from(hex, 'hex').toString('utf-8');
+type WalletInstance = {
+  experimental: ExperimentalFeatures;
+  getBalance(): Promise<string>;
+  getChangeAddress(): Promise<string>;
+  getNetworkId(): Promise<number>;
+  getRewardAddresses(): Promise<string[]>;
+  getUnusedAddresses(): Promise<string[]>;
+  getUsedAddresses(): Promise<string[]>;
+  getUtxos(): Promise<string[] | undefined>;
+  signData(address: string, payload: string): Promise<DataSignature>;
+  signTx(tx: string, partialSign: boolean): Promise<string>;
+  submitTx(tx: string): Promise<string>;
+};
+
+type ExperimentalFeatures = {
+  getCollateral(): Promise<string[] | undefined>;
+};

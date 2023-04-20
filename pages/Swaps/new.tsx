@@ -14,32 +14,31 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'
 import { AssetExtended, BrowserWallet, Unit } from '@meshsdk/core'
-import {initialise} from 'marlowe-ts-sdk/src/runtime/write/command'
-import { AxiosRestClient } from 'marlowe-ts-sdk/src/runtime/endpoints'
-import { HexTransactionWitnessSet, MarloweTxCBORHex } from 'marlowe-ts-sdk/src/runtime/common/textEnvelope'
-import * as Examples from 'marlowe-ts-sdk/src/language/core/v1/examples/swap'
-import { datetoTimeout } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when'
-import { token } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token'
-import { addressBech32 } from 'marlowe-ts-sdk/src/runtime/common/address'
+import {initialise} from 'marlowe-ts-sdk-beta/src/runtime/write/command'
+import { AxiosRestClient } from 'marlowe-ts-sdk-beta/src/runtime/endpoints'
+import { HexTransactionWitnessSet, MarloweTxCBORHex } from 'marlowe-ts-sdk-beta/src/runtime/common/textEnvelope'
+import * as Examples from 'marlowe-ts-sdk-beta/src/language/core/v1/examples/swap'
+import { datetoTimeout } from 'marlowe-ts-sdk-beta/src/language/core/v1/semantics/contract/when'
+import { token } from 'marlowe-ts-sdk-beta/src/language/core/v1/semantics/contract/common/token'
+import { addressBech32 } from 'marlowe-ts-sdk-beta/src/runtime/common/address'
+import { MarloweJSONCodec } from 'marlowe-ts-sdk-beta/src/adapter/json'
 
 
-const waitConfirmation : (txHash : string ) => TE.TaskEither<Error,boolean> = (txHash) => TE.of (true) 
-const signMarloweTx : (extension : BrowserWallet) => (cborHex :MarloweTxCBORHex) => TE.TaskEither<Error,HexTransactionWitnessSet> =
-  (extension) => (cborHex) => TE.fromTask(() => extension.signTx(cborHex))
+
 
 export const NewSwap = ({state }) => {
   const connectedWallet : Connected = state
   
   const defaultDeadlines = pipe(Date.now(),(date) => addDays(5,date),(date) => format(date,"yyyy-MM-dd'T'hh:mm"))
-  const [amount ,setAmount] = useState<number>(0)
+  const [amount ,setAmount] = useState<bigint>(0n)
   const [unit ,setUnit] = useState<Unit>('lovelace')
 
   const getMaxAmount = (unit) => pipe(connectedWallet.assetBalances
     , A.findFirst((w : AssetExtended) => w.unit === unit) 
-    , O.map (a => parseInt (a.quantity,10))
-    , O.getOrElse(() => Number(0)) )
+    , O.map (a => BigInt(a.quantity))
+    , O.getOrElse(() => BigInt(0)) )
 
-  const [amountToSwap ,setAmountToSwap] = useState<number>(0)
+  const [amountToSwap ,setAmountToSwap] = useState<bigint>(0n)
   const [policyIdToSwap ,setPolicyIdToSwap] = useState<string>('')
   const [tokenNameToSwap ,setTokenNameToSwap] = useState<string>('')
   const [recipient ,setRecipient] = useState<string>('')
@@ -50,44 +49,37 @@ export const NewSwap = ({state }) => {
 
   const submit = async (event) => {
     event.preventDefault();
-    const usedAddresses = await connectedWallet.walletsdk.getUsedAddresses ()
-    const collaterals = await connectedWallet.walletsdk.getCollateral()
-    const changeAddress = await connectedWallet.walletsdk.getChangeAddress ()
+    const {marloweSDK,meshExtensionSDK} = connectedWallet
+    const usedAddresses = await meshExtensionSDK.getUsedAddresses ()
+    const collaterals = await meshExtensionSDK.getCollateral()
+    const changeAddress = await meshExtensionSDK.getChangeAddress ()
+
     const swapRequest = { adaDepositTimeout   : pipe(Date.now(),addDays(1),datetoTimeout)
                         , tokenDepositTimeout : pipe(Date.now(),addDays(2),datetoTimeout)
                         , amountOfADA   : 3n
-                        , amountOfToken : 10n
+                        , amountOfToken : amountToSwap
                         , token :token(policyIdToSwap,tokenNameToSwap) }
     const swapWithExpectedInputs =  Examples.swapWithExpectedInputs(swapRequest)
 
     await pipe
-      ( initialise 
-          (AxiosRestClient('http://0.0.0.0:34104'))
-          (waitConfirmation)
-          (signMarloweTx(connectedWallet.walletsdk))
-          ({ changeAddress: addressBech32(changeAddress)
-            , usedAddresses: usedAddresses.length == 0 
-                                ? O.none 
-                                : pipe( usedAddresses
-                                      , A.map(addressBech32)
-                                      , O.some) 
-            , collateralUTxOs: O.some(collaterals)})
+      ( marloweSDK.initialise 
+          (changeAddress,usedAddresses,collaterals)
           ({ contract: swapWithExpectedInputs.swap
               , roles: {'Ada provider'   : addressBech32(changeAddress) 
                         ,'Token provider' : addressBech32(recipient)}
               , version: 'v1'
               , metadata: {}
               , tags : { 'swap.react.demo' : 
-                          { 'fromAddress' : changeAddress as any
-                          , 'toAddress'   : recipient as any
-                          , 'note'        : note as any}}
+                          { 'note'        : note }}
               , minUTxODeposit: 3_000_000})
       , TE.match (
           (error) => { console.log(error)
-                       setSubmitFailed(JSON.stringify(error))},
+                       setSubmitFailed(JSON.stringify(error))
+                       setSubmitSucceed('')},
           (contractDetails) => 
                      { console.log(contractDetails)
-                       setSubmitSucceed(JSON.stringify(contractDetails)) })
+                       setSubmitSucceed(MarloweJSONCodec.encode(contractDetails))
+                       setSubmitFailed('') })
       )()
   };
 
@@ -97,7 +89,7 @@ export const NewSwap = ({state }) => {
   };
   return (<>
       <br/>
-      <Form onSubmit={submit}>
+      <Form onSubmit={submit} success={submitSucceed !== ''} error={submitFailed !== ''}>
       <h4> Tokens Provided </h4>  
       <fieldset style={fieldsetStyle}>       
         <Form.Group  widths="equal" > 
@@ -122,7 +114,7 @@ export const NewSwap = ({state }) => {
               step='0' 
               max={getMaxAmount(unit)}
               min='0'
-              onChange= {(e) => {setAmount(parseInt(e.target.value,10))}} 
+              onChange= {(e) => {setAmount(BigInt(e.target.value))}} 
               value ={amount} 
                 />
         </Form.Group>
@@ -147,7 +139,7 @@ export const NewSwap = ({state }) => {
           <Form.Input  
             label="Amount"
             type='number' 
-            onChange= {(e) => {setAmountToSwap(parseInt(e.target.value,10))}} 
+            onChange= {(e) => {setAmountToSwap(BigInt(e.target.value))}} 
             value ={amountToSwap}   
             width={4}  />
           
@@ -167,6 +159,8 @@ export const NewSwap = ({state }) => {
           control={TextArea}
           id='note'
           label='Note'
+          onChange= {(e) => {setNote(e.target.value)}}
+          value={note} 
           placeholder='Add a note about you swap ...'
         />
          <Form.Group inline >
@@ -179,13 +173,13 @@ export const NewSwap = ({state }) => {
         {(submitSucceed !== '')? 
           <Message
             success
-            header='Marlowe Contract Initialised'
+            header='Marlowe Contract Initialized'
             content= {submitSucceed}
           /> : <></> }
         {(submitFailed !== '')? 
           <Message
             error
-            header='Marlowe Contract Initialised'
+            header='Marlowe Contract Initialization Failed'
             content= {submitFailed}
           /> : <></> }
         <span>

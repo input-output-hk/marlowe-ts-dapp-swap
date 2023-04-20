@@ -3911,14 +3911,6 @@ core-util-is@~1.0.0:
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.3.tgz#a6042d3634c2b27e9328f837b965fac83808db85"
   integrity sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==
 
-cors@^2.8.5:
-  version "2.8.5"
-  resolved "https://registry.yarnpkg.com/cors/-/cors-2.8.5.tgz#eac11da51592dd86b9f06f6e7ac293b3df875d29"
-  integrity sha512-KIHbLJqu73RGr/hnbrO9uBeixNGuvSQjul/jdFvS/KFSIH1hWVd1ng7zOHx+YrEfInLG7q4n6GHQ9cDtxv/P6g==
-  dependencies:
-    object-assign "^4"
-    vary "^1"
-
 cosmiconfig@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/cosmiconfig/-/cosmiconfig-6.0.0.tgz#da4fee853c52f6b1e6935f41c1a2fc50bd4a9982"
@@ -7252,10 +7244,10 @@ marked@^4.0.15:
   resolved "https://registry.yarnpkg.com/marked/-/marked-4.3.0.tgz#796362821b019f734054582038b116481b456cf3"
   integrity sha512-PRsaiG84bK+AMvxziE/lCFss8juXjNaWzVbN5tXAm4XjeaS9NAHhop+PjQxz2A9h8Q4M/xGmzP8vqNwy6JeK0A==
 
-marlowe-ts-sdk@0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/marlowe-ts-sdk/-/marlowe-ts-sdk-0.0.2.tgz#d2e73306fa34127860c8e6597babdc69be77cd2d"
-  integrity sha512-O9NZ3nUMPIlp+xfIem/VunyLaJOQZqBRCgQtYHXbzwjnSUwFsUkdsELoxQIpyG8zRVAU0KCeWXkXBixLNDZTXA==
+marlowe-ts-sdk-beta@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/marlowe-ts-sdk-beta/-/marlowe-ts-sdk-beta-0.0.1.tgz#950fa868516b8afe7655f5334a617710854ef6aa"
+  integrity sha512-kEntpOexqPayn5SdFY9tvqn/YDnOGcWTkWd06zmMNfIyB52hgVLqw/06woMnwe9zXgaVpJw2igU2cVtdA413/A==
   dependencies:
     "@blockfrost/blockfrost-js" "^5.2.0"
     "@blockfrost/openapi" "^0.1.54"
@@ -7690,7 +7682,7 @@ oas-validator@^5.0.8:
     should "^13.2.1"
     yaml "^1.10.0"
 
-object-assign@^4, object-assign@^4.0.1, object-assign@^4.1.1:
+object-assign@^4.0.1, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
   integrity sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==
@@ -10479,7 +10471,7 @@ v8-to-istanbul@^8.1.0:
     convert-source-map "^1.6.0"
     source-map "^0.7.3"
 
-vary@^1, vary@~1.1.2:
+vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==

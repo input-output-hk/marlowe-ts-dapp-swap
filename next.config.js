@@ -1,14 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['marlowe-ts-sdk'],
-  async rewrites() {
-    return [
-      {
-        source: '/marlowe/runtime/:path*',
-        destination: 'http://0.0.0.0:32943/:path*',
-      },
-    ]
-  },
+  transpilePackages: ['marlowe-ts-sdk-beta'],
   reactStrictMode: false,
   webpack: function (config, options) {
     config.experiments = {
