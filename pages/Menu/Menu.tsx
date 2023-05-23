@@ -73,7 +73,7 @@ export const ConnectWallet = ({ state }) => {
 
 export const ConnectedWallet = ({state}) => {
   const connected : Connected = state
-  const { disconnect, extensionSelected , assetBalances , isMainnnet} = connected;
+  const { disconnect, extensionSelectedDetails , assetBalances , isMainnnet} = connected;
   console.log('state' , state)
   const lovelaceBalance = 
       pipe(assetBalances 
@@ -85,7 +85,7 @@ export const ConnectedWallet = ({state}) => {
   const decimalADAs = (lovelaceBalance % 1_000_000)
   return  lovelaceBalance > 0 ? (
     <Dropdown
-      trigger = {<><span className='small'><Image src={extensionSelected.icon} className="walletIcon" alt="" 
+      trigger = {<><span className='small'><Image src={extensionSelectedDetails.icon} className="walletIcon" alt="" 
                     />{(adas).toString()}.</span>
                      <span  style={{fontSize: "smaller"}}>{decimalADAs + ' '} </span> 
                      <span  style={{fontWeight: 'bold',fontSize: "smaller"}}> {isMainnnet ? ' ₳' : ' t₳' }</span>
@@ -101,7 +101,7 @@ export const ConnectedWallet = ({state}) => {
     </Dropdown>
   ) : (
     <Dropdown
-      trigger = {<><span className='small'><Image src={extensionSelected.icon}  className="walletIcon" alt="" 
+      trigger = {<><span className='small'><Image src={extensionSelectedDetails.icon}  className="walletIcon" alt="" 
                     />0 {isMainnnet ? ' ₳ ' : ' t₳'}</span>
                 </>}
       item

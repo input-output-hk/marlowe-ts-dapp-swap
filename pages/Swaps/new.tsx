@@ -1,6 +1,6 @@
 import { pipe } from 'fp-ts/lib/function'
 import React,  { useState } from 'react'
-import { Icon, Message } from 'semantic-ui-react'
+import { Message } from 'semantic-ui-react'
 import { addDays } from 'date-fns/fp'
 import {format} from 'date-fns'
 import {
@@ -10,16 +10,13 @@ import {
 } from 'semantic-ui-react'
 import { Connected } from '../Hooks/Wallet'
 import * as A from 'fp-ts/Array'
-import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'
-import { AssetExtended, BrowserWallet, Unit } from '@meshsdk/core'
+import { AssetExtended } from '@meshsdk/core'
 
-import * as Swaps from 'marlowe-ts-sdk/src/language/core/v1/examples/swaps/swap-token-token'
 import { datetoTimeout } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when'
 import { token } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token'
 import { addressBech32 } from 'marlowe-ts-sdk/src/runtime/common/address'
-import { MarloweJSONCodec } from 'marlowe-ts-sdk/src/adapter/json'
 
 
 export const NewSwap = ({state }) => {
@@ -51,38 +48,26 @@ export const NewSwap = ({state }) => {
 
   const submit = async (event) => {
     event.preventDefault();
-    const {marloweSDK,meshExtensionSDK} = connectedWallet
-    const usedAddresses = await meshExtensionSDK.getUsedAddresses ()
-    const collaterals = await meshExtensionSDK.getCollateral()
-    const changeAddress = await meshExtensionSDK.getChangeAddress ()
-
-    const swapRequest = { tokenA_DepositTimeout   : pipe(Date.now(),addDays(1),datetoTimeout)
-                        , tokenB_DepositTimeout : pipe(Date.now(),addDays(2),datetoTimeout)
-                        , tokenA   : token(asset.policyId,asset.assetName)
-                        , tokenA_Amount : amount
-                        , tokenB : token(policyIdToSwap,tokenNameToSwap)
-                        , tokenB_Amount : amountToSwap }
-    const swap =  Swaps.swap_tokenA_tokenB(swapRequest)
+    const {swapServices} = connectedWallet
 
     await pipe
-      ( marloweSDK.initialise 
-          (changeAddress,usedAddresses,collaterals)
-          ({ contract: swap
-              , roles: {'Ada provider'   : addressBech32(changeAddress) 
-                        ,'Token provider' : addressBech32(recipient)}
-              , version: 'v1'
-              , metadata: {}
-              , tags : {'swap.L1.dapp.by.marlowe.team' : { 'note' : note }
-                       ,"initialised" : {}}
-              , minUTxODeposit: 3_000_000})
-      , TE.chainFirst ( () => marloweSDK.fetchInitializeContracts)
+      ( swapServices.initialize
+          (addressBech32 (recipient) )
+          ({ note : note
+           , self : { depositTimeout   : pipe(Date.now(),addDays(1),datetoTimeout)      
+                  , token : token(asset.policyId,asset.assetName)
+                  , amount : amount }
+           , b : { depositTimeout : pipe(Date.now(),addDays(2),datetoTimeout)
+                 , token : token(policyIdToSwap,tokenNameToSwap)
+                 , amount : amountToSwap }}) 
+          
       , TE.match (
           (error) => { console.log(error)
                        setSubmitFailed(JSON.stringify(error))
                        setSubmitSucceed('')},
-          (initializeContracts) => 
-                     { console.log(initializeContracts)
-                       setSubmitSucceed(MarloweJSONCodec.encode(initializeContracts))
+          () => 
+                     { 
+                       setSubmitSucceed('Successfully created your swap')
                        setSubmitFailed('') })
       )()
   };
