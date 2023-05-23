@@ -22,7 +22,7 @@ export default class MyMenu extends Component {
         <Menu.Item>
           <Logo />
         </Menu.Item>
-        <Menu.Item> <h3>P2P Swaps </h3></Menu.Item>
+        <Menu.Item> <h3> </h3></Menu.Item>
         <Menu.Menu position='right'>
           <ConnectionWallet /> 
         </Menu.Menu>
