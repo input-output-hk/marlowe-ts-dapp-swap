@@ -2,7 +2,7 @@ import React from 'react'
 import {Button, Container, Form, Input} from 'semantic-ui-react'
 import * as Marlowe from 'marlowe-ts-sdk/src/runtime/endpoints';
 import {Connected} from 'pages/Hooks/Wallet';
-import {contractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
+import {ContractId, contractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
 import {pipe} from 'fp-ts/lib/function';
 import {Contract} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract';
 import {DecodingError} from 'marlowe-ts-sdk/src/runtime/common/codec';
@@ -16,13 +16,47 @@ interface Props {
 
 export const FindContract = (props : Props) => {
   const [contract, setContract] = React.useState(null);
-  return contract == null
-    ? <FindContractSearch {...props} setContract={setContract} />
-    : <ShowContract {...props} contract={contract} />;
+  return (
+    <>
+      <FindContractSearch {...props} setContract={setContract} />
+      {!!contract && <ShowContract {...props} contract={contract} />}
+    </>
+  );
 };
 
-const ShowContract = ({ contract }: Props & { contract : ContractDetails }) => {
-  return <p>{MarloweJSONCodec.encode(contract)}</p>;
+type ContractAction = "choose" | "deposit";
+
+const ShowContract = ({ contract, walletState }: Props & { contract : ContractDetails }) => {
+  const [currentAction, setCurrentAction] = React.useState<ContractAction>();
+  const [isSubmitting, setSubmitting] = React.useState(false);
+  return (
+    <Container>
+      {MarloweJSONCodec.encode(contract)}
+      {currentAction
+        ? <>
+          {currentAction == "deposit"
+              ? <DepositForm contractId={contract.contractId} walletState={walletState} setSubmitting={setSubmitting} />
+              : <ChoiceForm contractId={contract.contractId} walletState={walletState} setSubmitting={setSubmitting} />
+          }
+          <Button onClick={() => setCurrentAction(undefined)}>Cancel</Button>
+          </>
+        : <>
+            <Button onClick={() => setCurrentAction("deposit")}>Deposit</Button>
+            <Button onClick={() => setCurrentAction("choose")}>Make choice</Button>
+            <Button>Notify</Button>
+            <Button>Advance</Button>
+          </>
+      }
+    </Container>
+  );
+};
+
+const DepositForm = ({ contractId, walletState }: Props & { contractId : ContractId, setSubmitting: (isSubmitting: boolean) => void }) => {
+  return <></>;
+};
+
+const ChoiceForm = ({ contractId, walletState }: Props & { contractId : ContractId, setSubmitting: (isSubmitting: boolean) => void }) => {
+  return <></>;
 };
 
 const FindContractSearch = ({ walletState: { marloweSDK }, setContract }: Props & { setContract: (contract: ContractDetails) => void }) => {

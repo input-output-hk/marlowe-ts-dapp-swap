@@ -16,7 +16,7 @@ import { Token } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/co
 import { ContractId } from 'marlowe-ts-sdk/src/runtime/contract/id'
 
 
-export const runtimeUrl = 'http://0.0.0.0:40124'  
+export const runtimeUrl = 'http://marlowe.palas87.es:8082'  
 export const dappName = 'dApp.swap.L1'
 
 export type SwapState = 'initialised' | 'provisionned' | 'requested' | 'done'
