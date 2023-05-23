@@ -1,16 +1,11 @@
 import React from 'react'
 import {Button, Container, Form, Input, Label} from 'semantic-ui-react'
-import * as Marlowe from 'marlowe-ts-sdk/src/runtime/endpoints';
 import {Connected} from 'pages/Hooks/Wallet';
 import {ContractId, contractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
-import {pipe} from 'fp-ts/lib/function';
-import {Contract} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract';
 import {DecodingError} from 'marlowe-ts-sdk/src/runtime/common/codec';
 import {ContractDetails} from 'marlowe-ts-sdk/src/runtime/contract/details';
 import {MarloweJSONCodec} from 'marlowe-ts-sdk/src/adapter/json';
-import { array } from 'fp-ts';
 import {ChosenNum, InputChoice} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when/input/choice';
-
 
 interface Props {
   walletState: Connected;
@@ -31,21 +26,22 @@ type ContractAction = "choose" | "deposit";
 const ShowContract = ({ contract, walletState }: Props & { contract : ContractDetails }) => {
   const [currentAction, setCurrentAction] = React.useState<ContractAction>();
   const [isSubmitting, setSubmitting] = React.useState(false);
-  async function advanceContract() {
+  async function advanceContract(isNotify : boolean = false) {
     const {marloweSDK} = walletState;
     setSubmitting(true);
     try {
       const result = await marloweSDK.commands.applyInputs(contract.contractId)({ version: "v1"
-                                                                                      , inputs: []
-                                                                                      , metadata: {}
-                                                                                      , tags : {}
-                                                                                      })();
+                                                                                , inputs: isNotify ? ['input_notify' ] : []
+                                                                                , metadata: {}
+                                                                                , tags : {}
+                                                                                })();
       switch (result._tag) {
         case "Left":
+          console.log(result.left)
           alert(result.left.toString())
           break;
         case "Right":
-          alert("contract advanced");
+          alert(isNotify?"contract notified":"contract advanced");
           break;
       };
 
@@ -69,7 +65,7 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
         : <>
             <Button onClick={() => setCurrentAction("deposit")}>Deposit</Button>
             <Button onClick={() => setCurrentAction("choose")}>Make choice</Button>
-            <Button>Notify</Button>
+            <Button onClick={() => advanceContract(true)}>Notify</Button>
             <Button onClick={() => advanceContract()}>Advance</Button>
           </>
       }
