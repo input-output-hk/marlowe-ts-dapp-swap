@@ -1,11 +1,12 @@
 import React from 'react'
-import {Button, Container, Form, Input, Label} from 'semantic-ui-react'
+import {Button, Container, Form, Input} from 'semantic-ui-react'
 import {Connected} from 'pages/Hooks/Wallet';
 import {ContractId, contractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
 import {DecodingError} from 'marlowe-ts-sdk/src/runtime/common/codec';
 import {ContractDetails} from 'marlowe-ts-sdk/src/runtime/contract/details';
 import {MarloweJSONCodec} from 'marlowe-ts-sdk/src/adapter/json';
-import {ChosenNum, InputChoice} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when/input/choice';
+import {InputChoice} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when/input/choice';
+import {InputDeposit} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when/input/deposit';
 
 interface Props {
   walletState: Connected;
@@ -73,8 +74,58 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
   );
 };
 
-const DepositForm = ({ contractId, walletState }: Props & { contractId : ContractId, setSubmitting: (isSubmitting: boolean) => void }) => {
-  return <></>;
+const DepositForm = ({ contractId, walletState, setSubmitting }: Props & { contractId : ContractId, setSubmitting: (isSubmitting: boolean) => void }) => {
+  const [partyAddress, setPartyAddress] = React.useState("");
+  const [accountAddress, setAccountAddress] = React.useState("");
+  const [isAda, setIsAda] = React.useState(true);
+  const [currency_symbol, setCurrencySymbol] = React.useState("");
+  const [token_name, setTokenName] = React.useState("");
+  const [depositValue, setChosenValue] = React.useState(0);
+  const submit = async () => {
+    setSubmitting(true);
+    try {
+      const input: InputDeposit = {
+        input_from_party: {
+          address: partyAddress,
+        },
+        that_deposits: BigInt(depositValue),
+        of_token: {
+          currency_symbol: isAda ? "" : currency_symbol,
+          token_name: isAda ? "" : token_name,
+        },
+        into_account: {
+          address: accountAddress,
+        },
+      };
+      const result = await walletState.marloweSDK.commands.applyInputs(contractId)({
+        version: "v1",
+        inputs: [input],
+        metadata: {},
+        tags: {},
+      })();
+      switch (result._tag) {
+        case "Left":
+          alert(result.left);
+          break;
+        case "Right":
+          alert("It worked");
+          break;
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  return (
+    <Form>
+      <Form.Input label="Deposit from" value={partyAddress} onChange={(ev) => setPartyAddress(ev.target.value)} />
+      <Form.Input label="Asset quantity" type="number" value={depositValue} onChange={(ev) => setChosenValue(parseInt(ev.target.value))} />
+      <Form.Checkbox label="ADA" checked={isAda} onChange={(_, data) => setIsAda(data.checked)} />
+      <Form.Input label="Asset currency" disabled={isAda} value={currency_symbol} onChange={(ev) => setCurrencySymbol(ev.target.value)} />
+      <Form.Input label="Asset token" disabled={isAda} value={token_name} onChange={(ev) => setTokenName(ev.target.value)} />
+      <Form.Input label="Into account" value={accountAddress} onChange={(ev) => setAccountAddress(ev.target.value)} />
+      <Form.Button onClick={submit}>Submit</Form.Button>
+    </Form>
+  );
 };
 
 const ChoiceForm = ({ contractId, walletState, setSubmitting }: Props & { contractId : ContractId, setSubmitting: (isSubmitting: boolean) => void }) => {
