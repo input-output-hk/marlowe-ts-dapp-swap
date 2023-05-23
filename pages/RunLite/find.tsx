@@ -8,6 +8,10 @@ import {Contract} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract';
 import {DecodingError} from 'marlowe-ts-sdk/src/runtime/common/codec';
 import {ContractDetails} from 'marlowe-ts-sdk/src/runtime/contract/details';
 import {MarloweJSONCodec} from 'marlowe-ts-sdk/src/adapter/json';
+import { useWallet } from '@meshsdk/react';
+import { setDefaultResultOrder } from 'dns/promises';
+import { MarloweVersion } from 'marlowe-ts-sdk/src/runtime/common/version';
+import { array } from 'fp-ts';
 
 
 interface Props {
@@ -44,7 +48,7 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
             <Button onClick={() => setCurrentAction("deposit")}>Deposit</Button>
             <Button onClick={() => setCurrentAction("choose")}>Make choice</Button>
             <Button>Notify</Button>
-            <Button>Advance</Button>
+            <Button onClick={() => advanceContract(contract, walletState)}>Advance</Button>
           </>
       }
     </Container>
@@ -92,4 +96,35 @@ const FindContractSearch = ({ walletState: { marloweSDK }, setContract }: Props 
     </Container>
   );
 }
+
+async function advanceContract(contractDetails : ContractDetails, walletState : Connected) {
+  const {marloweSDK} = walletState;
+  // const [contract, setContract] = React.useState(null);
+  // const [isLoading, setIsLoading] = React.useState(false);
+  // const [error, setError] = React.useState<Error | DecodingError>();
+  // setIsLoading(true);
+  // try {
+    const result = await marloweSDK.commands.applyInputs(contractDetails.contractId)({ version: "v1"
+                                                                                     , inputs: new Array()
+                                                                                     , metadata: {}
+                                                                                     , tags : {}
+                                                                                     })();
+    switch (result._tag) {
+      case "Left":
+        // setError(result.left);
+        break;
+      case "Right":
+        // setContract(result.right.outputContract);
+        break;
+    };
+
+  // } catch (err) {
+  //   setError(err)
+  // } finally {
+  //   setIsLoading(false);
+  // }
+
+}
+
+
 
