@@ -4,14 +4,23 @@ import { Tab } from 'semantic-ui-react'
 import { useWalletState } from '../Hooks/Wallet'
 import { About } from './about'
 import { NewContract } from './new'
+import { FindContract } from './find'
 
 export const RunLiteTabs = () => { 
-  let walletState = useWalletState();
+  const walletState = useWalletState();
   const panes = () => { switch (walletState.type) {
     case 'disconnected' : return panesDisconnected 
     case 'connecting'   : return panesConnecting
-    case 'connected'    : return [{ menuItem: <Menu.Item key='new'><Icon name='add circle' color='grey' size='large' /> New Contract </Menu.Item>,
-                                    render: () => <NewContract state={walletState}/>}]
+    case 'connected'    : return [
+      {
+        menuItem: <Menu.Item>Find contract</Menu.Item>,
+        render: () => <Tab.Pane><FindContract walletState={walletState}/></Tab.Pane>
+      },
+      {
+        menuItem: <Menu.Item key='new'><Icon name='add circle' color='grey' size='large' /> New Contract </Menu.Item>,
+        render: () => <Tab.Pane><NewContract state={walletState}/></Tab.Pane>
+      },
+    ]
   }}  
 
   return (<div><Tab panes={panes()} /></div>)
