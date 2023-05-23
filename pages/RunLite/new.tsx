@@ -53,9 +53,9 @@ export const NewContract = ({state }) => {
           (error) => { console.log(error)
                        setSubmitFailed(JSON.stringify(error))
                        setSubmitSucceed('')},
-          () => 
+          ({ contractId }) => 
                      { 
-                       setSubmitSucceed('Successfully created your swap')
+                       setSubmitSucceed('Contract created. Contract ID: ' + contractId)
                        setSubmitFailed('') })
       )()
   };

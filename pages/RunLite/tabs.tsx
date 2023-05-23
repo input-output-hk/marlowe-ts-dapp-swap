@@ -1,5 +1,5 @@
 import React,  {  } from 'react'
-import { Icon, Menu } from 'semantic-ui-react'
+import { Container, Icon, Menu } from 'semantic-ui-react'
 import { Tab } from 'semantic-ui-react'
 import { useWalletState } from '../Hooks/Wallet'
 import { About } from './about'
@@ -23,7 +23,7 @@ export const RunLiteTabs = () => {
     ]
   }}  
 
-  return (<div><Tab panes={panes()} /></div>)
+  return (<Container><Tab panes={panes()} /></Container>)
   
 } 
 

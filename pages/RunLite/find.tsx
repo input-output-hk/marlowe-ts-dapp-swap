@@ -1,12 +1,14 @@
-import React from 'react'
-import {Button, Container, Form, Input} from 'semantic-ui-react'
-import {Connected} from 'pages/Hooks/Wallet';
-import {ContractId, contractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
-import {DecodingError} from 'marlowe-ts-sdk/src/runtime/common/codec';
-import {ContractDetails} from 'marlowe-ts-sdk/src/runtime/contract/details';
+import {pipe} from 'fp-ts/lib/function';
+import * as O from 'fp-ts/lib/Option';
 import {MarloweJSONCodec} from 'marlowe-ts-sdk/src/adapter/json';
 import {InputChoice} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when/input/choice';
 import {InputDeposit} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when/input/deposit';
+import {DecodingError} from 'marlowe-ts-sdk/src/runtime/common/codec';
+import {ContractDetails} from 'marlowe-ts-sdk/src/runtime/contract/details';
+import {ContractId, contractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
+import {Connected} from 'pages/Hooks/Wallet';
+import React from 'react';
+import {Button, Container, Divider, Form, Input, Label, SemanticCOLORS, Table} from 'semantic-ui-react';
 
 interface Props {
   walletState: Connected;
@@ -52,9 +54,85 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
 
   }
 
+  const [color, status] = pipe(
+    contract.utxo,
+    O.match(
+      () => ["green" as SemanticCOLORS, "Closed"],
+      () => ["blue" as SemanticCOLORS, "Open"],
+    ),
+  );
+
   return (
     <Container>
-      {MarloweJSONCodec.encode(contract)}
+      <Divider />
+      <Table color={color} celled striped>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell colSpan='3'>Contract Details <Label color={color}>{status}</Label></Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+
+        <Table.Body>
+          <Table.Row>
+            <Table.Cell collapsing>Contract ID</Table.Cell>
+            <Table.Cell>{contract.contractId.toString()}</Table.Cell>
+          </Table.Row>
+          <Table.Row>
+            <Table.Cell collapsing>Roles currency</Table.Cell>
+            <Table.Cell>{contract.roleTokenMintingPolicyId.toString()}</Table.Cell>
+          </Table.Row>
+          <Table.Row>
+            <Table.Cell collapsing>Marlowe version</Table.Cell>
+            <Table.Cell>{contract.version.toString()}</Table.Cell>
+          </Table.Row>
+          <Table.Row>
+            <Table.Cell collapsing>Metadata</Table.Cell>
+            <Table.Cell><pre>{JSON.stringify(contract.metadata, undefined, 2)}</pre></Table.Cell>
+          </Table.Row>
+          <Table.Row>
+            <Table.Cell collapsing>Initial contract</Table.Cell>
+            <Table.Cell><pre>{JSON.stringify(JSON.parse(MarloweJSONCodec.encode(contract.initialContract)), undefined, 2)}</pre></Table.Cell>
+          </Table.Row>
+          {pipe(
+            contract.currentContract,
+            O.match(
+              () => <></>,
+              (c) => (
+                <Table.Row>
+                  <Table.Cell collapsing>Current contract</Table.Cell>
+                  <Table.Cell><pre>{JSON.stringify(JSON.parse(MarloweJSONCodec.encode(c)), undefined, 2)}</pre></Table.Cell>
+                </Table.Row>
+              )
+            ),
+          )}
+          {pipe(
+            contract.state,
+            O.match(
+              () => <></>,
+              (state) => (
+                <>
+                  <Table.Row>
+                    <Table.Cell collapsing>Accounts</Table.Cell>
+                    <Table.Cell><pre>{JSON.stringify(JSON.parse(MarloweJSONCodec.encode(state.accounts)), undefined, 2)}</pre></Table.Cell>
+                  </Table.Row>
+                  <Table.Row>
+                    <Table.Cell collapsing>Bound values</Table.Cell>
+                    <Table.Cell><pre>{JSON.stringify(JSON.parse(MarloweJSONCodec.encode(state.boundValues)), undefined, 2)}</pre></Table.Cell>
+                  </Table.Row>
+                  <Table.Row>
+                    <Table.Cell collapsing>Choices</Table.Cell>
+                    <Table.Cell><pre>{JSON.stringify(JSON.parse(MarloweJSONCodec.encode(state.choices)), undefined, 2)}</pre></Table.Cell>
+                  </Table.Row>
+                  <Table.Row>
+                    <Table.Cell collapsing>Min time</Table.Cell>
+                    <Table.Cell>{state.minTime.toString()}</Table.Cell>
+                  </Table.Row>
+                </>
+              )
+            ),
+          )}
+        </Table.Body>
+      </Table>
       {currentAction
         ? <>
           {currentAction == "deposit"
