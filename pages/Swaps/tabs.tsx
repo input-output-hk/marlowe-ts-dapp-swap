@@ -1,62 +1,91 @@
-import React,  { Component, useContext, useEffect, useReducer, useState } from 'react'
+import React,  { Component, useCallback, useContext, useEffect, useReducer, useState } from 'react'
 import { Container, Dropdown, Icon, Input, Label, Loader, Menu } from 'semantic-ui-react'
 import  Logo  from './marlowe-logo.svg'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as O from 'fp-ts/Option'
+import * as E from 'fp-ts/Either'
 import { CardanoWallet, WalletContext, useLovelace, useNetwork, useWallet, useWalletList,  } from '@meshsdk/react'
-
+import * as TE from 'fp-ts/TaskEither'
 import { Button, Checkbox, Table } from 'semantic-ui-react'
 import { Segment, Tab } from 'semantic-ui-react'
 import { ProvisionnedSwaps } from './provisionned'
 import { NewSwap } from './new'
 import { RequestedSwaps } from './requested'
-import { Connected, WalletState, useWalletState } from '../Hooks/Wallet'
+import { useWalletState } from '../Hooks/Wallet'
 import { InitializedSwaps } from './initialized'
+import { pipe } from 'fp-ts/lib/function'
+import { ClosedSwaps } from './closed'
+import { InitializedSwap, RequestedSwap, ProvisionnedSwap, ClosedSwap, SwapServices } from './service'
 
-const loremIpsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
 
-const panes = (walletState : WalletState) => 
-  {switch (walletState.type) {
-    case 'disconnected' : return [{
-      menuItem: <Menu.Item key='About'>About</Menu.Item>,
-      render: () => <p> {loremIpsum}</p>,}]
-    case 'connecting'   : return [{
-      menuItem: <Menu.Item key='About'>About</Menu.Item>,
-      render: () => <p> {loremIpsum}</p>,}]
-    case 'connected'    : 
-     return [
-      {
-        menuItem: <Menu.Item key='About'>About</Menu.Item>,
-        render: () => <p> {loremIpsum}</p>},
-        {
-          menuItem: <Menu.Item key='requested'>Requests<Label>2</Label></Menu.Item>,
-          render: () => <RequestedSwaps/>,
-        },
-        {
-          menuItem: <Menu.Item key='new'><Icon name='add circle' color='grey' size='large' /> New  </Menu.Item>,
-          render: () => <NewSwap state={walletState}/>,
-        },
-        {
-          menuItem: <Menu.Item key='initialized'>Initialized<Label>1</Label></Menu.Item>,
-          render: () => <InitializedSwaps/>,
-        },
-      {
-        menuItem: <Menu.Item key='provisionned'>Provisionned<Label>2</Label></Menu.Item>,
-        render: () => <ProvisionnedSwaps/>,
-      },
-      {
-        menuItem: <Menu.Item key='closed'>Done<Label>3</Label></Menu.Item>,
-        render: () => <RequestedSwaps />,
-      },
-    ]}}
+const fetchInitializedSwaps = (swapServices : SwapServices ) => 
+{console.log("here")
+ const noInitializedSwap : InitializedSwap[] = []
+ return pipe( swapServices.mySwaps.initializedSwaps
+   , TE.fold( a => T.of(noInitializedSwap),a => T.of(a))) ()
+   
+}
 
 export const SwapTabs = () => { 
-  const walletState = useWalletState();
-  console.log("there", walletState)
-  return (<div>
-            <Tab panes={panes(walletState)} />
-          </div>)
+  let walletState = useWalletState();
+  let [requestedSwaps, setRequestedSwap]       = useState<RequestedSwap[]>([]);
+  let [initializedSwaps, setInitializedSwaps]  = useState<InitializedSwap[]>([]);
+  let [provisionnedSwaps, setProvisionnedSwap] = useState<ProvisionnedSwap[]>([]);
+  let [closedSwaps, setClosedSwap]             = useState<ClosedSwap[]>([]);
+  console.log(initializedSwaps)
+  const panes = () => { switch (walletState.type) {
+    case 'disconnected' : return panesDisconnected 
+    case 'connecting'   : return panesConnecting
+    case 'connected'    : 
+      return [
+                  { menuItem: <Menu.Item key='About'>About</Menu.Item>, render: () => <p> {loremIpsum}</p>},
+                  menuRequestedSwaps(requestedSwaps),
+                  { menuItem: <Menu.Item key='new'><Icon name='add circle' color='grey' size='large' /> New  </Menu.Item>,
+                    render: () => <NewSwap state={walletState}/>}, 
+                  menuInitializedSwaps(initializedSwaps),
+                  menuProvisionnedSwaps(provisionnedSwaps),
+                  menuClosedSwaps (closedSwaps)
+                ]
+  }}  
+  useEffect(() => {
+    if(walletState.type == 'connected') {
+      fetchInitializedSwaps(walletState.swapServices) 
+       .then (setInitializedSwaps)
+    }
+    }
+    , [walletState.type,initializedSwaps.length]);
+  return (<div><Tab panes={panes()} /></div>)
   
+   
 } 
+
+const menuInitializedSwaps = (initializedSwaps:InitializedSwap[]) => (initializedSwaps.length === 0 ) ? {} : 
+        ({ menuItem: <Menu.Item key='initialized'>Initialized<Label>{initializedSwaps.length}</Label></Menu.Item>,
+          render: () => <InitializedSwaps initializedSwaps={initializedSwaps}/>,
+         }) 
+
+const menuProvisionnedSwaps = (provisionnedSwaps) => (provisionnedSwaps.length === 0 ) ? {} : 
+         ({ menuItem: <Menu.Item key='provisionned'>Provisionned<Label>{provisionnedSwaps.length}</Label></Menu.Item>,
+           render: () => <ProvisionnedSwaps />,
+          }) 
+const menuClosedSwaps = (closedSwaps) => (closedSwaps.length === 0 ) ? {} : 
+          ({ menuItem: <Menu.Item key='closed'>Closed<Label>{closedSwaps.length}</Label></Menu.Item>,
+            render: () => <ClosedSwaps />,
+           }) 
+const menuRequestedSwaps = (closedSwaps) => (closedSwaps.length === 0 ) ? {} : 
+           ({ menuItem: <Menu.Item key='requested'>Requested<Label>{closedSwaps.length}</Label></Menu.Item>,
+             render: () => <RequestedSwaps />,
+            }) 
+const panesDisconnected = [{
+      menuItem: <Menu.Item key='About'>About</Menu.Item>,
+      render: () => <p> <br/> {loremIpsum}</p>,}]
+
+const panesConnecting = [{
+      menuItem: <Menu.Item key='About'>About</Menu.Item>,
+      render: () => <p> <br/>  {loremIpsum}</p>,}]
+
+   
+const loremIpsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+
 
