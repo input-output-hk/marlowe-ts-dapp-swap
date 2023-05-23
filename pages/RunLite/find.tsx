@@ -42,15 +42,13 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
                                                                                       })();
       switch (result._tag) {
         case "Left":
-          alert(result.left)
+          alert(result.left.toString())
           break;
         case "Right":
           alert("contract advanced");
           break;
       };
 
-    } catch (err) {
-      alert(err)
     } finally {
       setSubmitting(false);
     }
