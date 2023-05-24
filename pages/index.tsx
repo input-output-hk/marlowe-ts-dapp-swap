@@ -1,10 +1,11 @@
 import Head from "next/head";
 
-import MyMenu from "./Menu/Menu";
+import  { ConnectionWallet } from "./Menu/Menu";
 import { Container, Grid, Menu } from "semantic-ui-react";
 import { SwapTabs } from "./Swaps/tabs";
-import { useState } from "react";
+import { Component, useState } from "react";
 import { RunLiteTabs } from "./RunLite/tabs";
+import  Logo  from './Menu/marlowe-logo.svg'
 
 export default function Home() {
 
@@ -22,34 +23,25 @@ export default function Home() {
       <main>
 
       <Container > 
-        <MyMenu/>
-        <Grid>
-        <Grid.Column width={4}>
-            <Menu vertical>
-            <Menu.Item>
-              <Menu.Menu>
-                <Menu.Item
+        <Menu secondary>
+          <Menu.Item>
+            <Logo />
+          </Menu.Item>
+          <Menu.Item
                   name='My Swaps'
                   active={activeItem === 'My Swaps'}
                   onClick={handleItemClick}
-                />
-              </Menu.Menu>
-              <Menu.Menu>
-                <Menu.Item
-                  name='Run Lite'
-                  active={activeItem === 'swaps'}
-                  onClick={handleItemClick}
-                />
-              </Menu.Menu>
-            </Menu.Item>
-
-          </Menu>
-        </Grid.Column>
-        <Grid.Column width={12}>
-          {activeItem === 'My Swaps' ? <SwapTabs/> : <RunLiteTabs/>}
-        </Grid.Column>
-        
-      </Grid>
+          />
+          <Menu.Item
+            name='Run Lite'
+            active={activeItem === 'swaps'}
+            onClick={handleItemClick}
+          />
+          <Menu.Menu position='right'>
+            <ConnectionWallet /> 
+          </Menu.Menu>
+        </Menu>
+        {activeItem === 'My Swaps' ? <SwapTabs/> : <RunLiteTabs/>}
       </Container>
       
      
@@ -61,3 +53,4 @@ export default function Home() {
     </div>
   );
 }
+

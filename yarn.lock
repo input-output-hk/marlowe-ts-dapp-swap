@@ -7244,10 +7244,10 @@ marked@^4.0.15:
   resolved "https://registry.yarnpkg.com/marked/-/marked-4.3.0.tgz#796362821b019f734054582038b116481b456cf3"
   integrity sha512-PRsaiG84bK+AMvxziE/lCFss8juXjNaWzVbN5tXAm4XjeaS9NAHhop+PjQxz2A9h8Q4M/xGmzP8vqNwy6JeK0A==
 
-marlowe-ts-sdk@0.0.18-beta:
-  version "0.0.18-beta"
-  resolved "https://registry.yarnpkg.com/marlowe-ts-sdk/-/marlowe-ts-sdk-0.0.18-beta.tgz#3c0320dbb02f6c75026500d3f637bd9e1ca2c8bb"
-  integrity sha512-XIF9elp5ZmNnofRWftSOcFgPVr8PIWKGD03jz6AWorRTfjbPWiwoX9P91B6htmQlI/+uuC86987ZylRIjQJbmw==
+marlowe-ts-sdk@0.0.20-beta:
+  version "0.0.20-beta"
+  resolved "https://registry.yarnpkg.com/marlowe-ts-sdk/-/marlowe-ts-sdk-0.0.20-beta.tgz#8d17ecd9ac077f5e0f6d1fd01241607b8bca736a"
+  integrity sha512-8KK5hKrXVZtw8c0D6g7G+gicFWFV5VwfvcxQxSolO2i/EGytIjOM559Z7A+9EyOAQw34YpHOufzhcHQ0wTOhDQ==
   dependencies:
     "@blockfrost/blockfrost-js" "^5.2.0"
     "@blockfrost/openapi" "^0.1.54"

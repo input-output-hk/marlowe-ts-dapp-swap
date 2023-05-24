@@ -3,11 +3,11 @@ import React from 'react'
 import {Button, Container, Divider, Form, Input, Label, Message, SemanticCOLORS, Table} from 'semantic-ui-react'
 import * as Marlowe from 'marlowe-ts-sdk/src/runtime/endpoints';
 import {Connected} from 'pages/Hooks/Wallet';
-import {ContractId, contractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
+import {ContractId, contractId, unContractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
 
 import {pipe} from 'fp-ts/lib/function';
 
-import {MarloweJSONCodec} from 'marlowe-ts-sdk/src/adapter/json';
+import {JsonAlwayAndOnlyBigInt, MarloweJSONCodec} from 'marlowe-ts-sdk/src/adapter/json';
 import {InputChoice} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when/input/choice';
 import {InputDeposit} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when/input/deposit';
 import {DecodingError} from 'marlowe-ts-sdk/src/runtime/common/codec';
@@ -73,7 +73,7 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
   return (
     <Container>
       <Divider />
-      <Table color={color} celled striped>
+      <Table color={color} celled striped structured >
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell colSpan='3'>Contract Details <Label color={color}>{status}</Label></Table.HeaderCell>
@@ -95,11 +95,14 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
           </Table.Row>
           <Table.Row>
             <Table.Cell collapsing>Metadata</Table.Cell>
-            <Table.Cell><pre>{JSON.stringify(contract.metadata, undefined, 2)}</pre></Table.Cell>
+            <Table.Cell > <pre> <code > {JsonAlwayAndOnlyBigInt.stringify(contract.metadata,undefined, 2)}</code></pre>
+            </Table.Cell>      
           </Table.Row>
           <Table.Row>
             <Table.Cell collapsing>Initial contract</Table.Cell>
-            <Table.Cell><pre>{JSON.stringify(JSON.parse(MarloweJSONCodec.encode(contract.initialContract)), undefined, 2)}</pre></Table.Cell>
+            <Table.Cell >
+                  <pre>{JsonAlwayAndOnlyBigInt.stringify(contract.initialContract, undefined, 2)}</pre>
+            </Table.Cell>
           </Table.Row>
           {pipe(
             contract.currentContract,
@@ -108,7 +111,9 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
               (c) => (
                 <Table.Row>
                   <Table.Cell collapsing>Current contract</Table.Cell>
-                  <Table.Cell><pre>{JSON.stringify(JSON.parse(MarloweJSONCodec.encode(c)), undefined, 2)}</pre></Table.Cell>
+                  <Table.Cell collapsing>
+                      <pre>{JsonAlwayAndOnlyBigInt.stringify(c, undefined, 2)}</pre>
+                  </Table.Cell>
                 </Table.Row>
               )
             ),
@@ -121,32 +126,46 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
                 <>
                   <Table.Row>
                     <Table.Cell collapsing>Accounts</Table.Cell>
-                    <Table.Cell><pre>{JSON.stringify(JSON.parse(MarloweJSONCodec.encode(state.accounts)), undefined, 2)}</pre></Table.Cell>
+                    <Table.Cell>
+                         <div style={{maxWidth:"900px"}}>
+                          <pre  style={{overflowX:"auto"}} >{JsonAlwayAndOnlyBigInt.stringify(state.accounts, undefined, 2)}</pre>
+                        </div>
+                      </Table.Cell>
                   </Table.Row>
                   <Table.Row>
                     <Table.Cell collapsing>Bound values</Table.Cell>
-                    <Table.Cell><pre>{JSON.stringify(JSON.parse(MarloweJSONCodec.encode(state.boundValues)), undefined, 2)}</pre></Table.Cell>
+                    <Table.Cell>
+                        <div style={{maxWidth:"900px"}}>
+                          <pre style={{overflowX:"auto"}}>{JsonAlwayAndOnlyBigInt.stringify(state.boundValues, undefined, 2)}</pre>
+                        </div>
+                      </Table.Cell>
                   </Table.Row>
                   <Table.Row>
                     <Table.Cell collapsing>Choices</Table.Cell>
-                    <Table.Cell><pre>{JSON.stringify(JSON.parse(MarloweJSONCodec.encode(state.choices)), undefined, 2)}</pre></Table.Cell>
+                    <Table.Cell>
+                       <div style={{maxWidth:"900px"}}>
+                          <pre style={{overflowX:"auto"}}>
+                            {JsonAlwayAndOnlyBigInt.stringify(state.choices, undefined, 2)}</pre>
+                        </div></Table.Cell>
                   </Table.Row>
                   <Table.Row>
                     <Table.Cell collapsing>Min time</Table.Cell>
                     <Table.Cell>{state.minTime.toString()}</Table.Cell>
-                  </Table.Row>
+                 </Table.Row>
                 </>
               )
             ),
           )}
         </Table.Body>
       </Table>
+      <Divider />
       {currentAction
         ? <>
           {currentAction == "deposit"
               ? <DepositForm contractId={contract.contractId} walletState={walletState} setSubmitting={setSubmitting} />
               : <ChoiceForm contractId={contract.contractId} walletState={walletState} setSubmitting={setSubmitting} />
           }
+          <Divider />
           <Button onClick={() => setCurrentAction(undefined)}>Cancel</Button>
           </>
         : <>

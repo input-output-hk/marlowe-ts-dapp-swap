@@ -1,6 +1,6 @@
 import React,  { Component } from 'react'
 import { Dropdown, Loader, Menu } from 'semantic-ui-react'
-import  Logo  from './marlowe-logo.svg'
+
 import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
 
@@ -8,28 +8,6 @@ import { Image } from 'semantic-ui-react'
 import { pipe } from 'fp-ts/lib/function'
 import { Connected, useWalletState } from '../Hooks/Wallet'
 
-
-export default class MyMenu extends Component {
-  state = { activeItem: 'home' }
-
-  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
-
-  render() {
-    const { activeItem } = this.state
-    console.log("Render Menu" )
-    return (
-      <Menu secondary>
-        <Menu.Item>
-          <Logo />
-        </Menu.Item>
-        <Menu.Item> <h3> </h3></Menu.Item>
-        <Menu.Menu position='right'>
-          <ConnectionWallet /> 
-        </Menu.Menu>
-      </Menu>
-    )
-  }
-}
 
 
 export const ConnectionWallet = () => {
