@@ -1,14 +1,22 @@
+
+import React from 'react'
+import {Button, Container, Divider, Form, Input, Label, Message, SemanticCOLORS, Table} from 'semantic-ui-react'
+import * as Marlowe from 'marlowe-ts-sdk/src/runtime/endpoints';
+import {Connected} from 'pages/Hooks/Wallet';
+import {ContractId, contractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
+
 import {pipe} from 'fp-ts/lib/function';
-import * as O from 'fp-ts/lib/Option';
+
 import {MarloweJSONCodec} from 'marlowe-ts-sdk/src/adapter/json';
 import {InputChoice} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when/input/choice';
 import {InputDeposit} from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when/input/deposit';
 import {DecodingError} from 'marlowe-ts-sdk/src/runtime/common/codec';
 import {ContractDetails} from 'marlowe-ts-sdk/src/runtime/contract/details';
-import {ContractId, contractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
-import {Connected} from 'pages/Hooks/Wallet';
-import React from 'react';
-import {Button, Container, Divider, Form, Input, Label, SemanticCOLORS, Table} from 'semantic-ui-react';
+
+import * as A from 'fp-ts/Array'
+import * as TE from 'fp-ts/TaskEither'
+import * as O from 'fp-ts/Option'
+
 
 interface Props {
   walletState: Connected;
@@ -152,6 +160,7 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
   );
 };
 
+
 const DepositForm = ({ contractId, walletState, setSubmitting }: Props & { contractId : ContractId, setSubmitting: (isSubmitting: boolean) => void }) => {
   const [partyAddress, setPartyAddress] = React.useState("");
   const [accountAddress, setAccountAddress] = React.useState("");
@@ -204,6 +213,7 @@ const DepositForm = ({ contractId, walletState, setSubmitting }: Props & { contr
       <Form.Button onClick={submit}>Submit</Form.Button>
     </Form>
   );
+
 };
 
 const ChoiceForm = ({ contractId, walletState, setSubmitting }: Props & { contractId : ContractId, setSubmitting: (isSubmitting: boolean) => void }) => {
