@@ -76,7 +76,8 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
       <Table color={color} celled striped structured >
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell colSpan='3'>Contract Details <Label color={color}>{status}</Label></Table.HeaderCell>
+            <Table.HeaderCell colSpan='3'> Contract Details <Label color={color}>{status}</Label> 
+              (<a href={'http://marlowe.palas87.es:8002/contractView?tab=info&contractId=' + encodeURIComponent(unContractId(contract.contractId))}> Marlowe Explorer </a> )</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
 
