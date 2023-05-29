@@ -17,6 +17,7 @@ import { InitializedSwaps } from './initialized'
 import { pipe } from 'fp-ts/lib/function'
 import { ClosedSwaps } from './closed'
 import { InitializedSwap, RequestedSwap, ProvisionnedSwap, ClosedSwap, SwapServices } from './service'
+import { About } from './about'
 
 
 const fetchInitializedSwaps = (swapServices : SwapServices ) => 
@@ -39,7 +40,7 @@ export const SwapTabs = () => {
     case 'connecting'   : return panesConnecting
     case 'connected'    : 
       return [
-                  { menuItem: <Menu.Item key='About'>About</Menu.Item>, render: () => <p> {loremIpsum}</p>},
+                  { menuItem: <Menu.Item key='About'>About</Menu.Item>, render: () => <About/>},
                   menuRequestedSwaps(requestedSwaps),
                   { menuItem: <Menu.Item key='new'><Icon name='add circle' color='grey' size='large' /> New  </Menu.Item>,
                     render: () => <NewSwap state={walletState}/>}, 
@@ -79,13 +80,11 @@ const menuRequestedSwaps = (closedSwaps) => (closedSwaps.length === 0 ) ? {} :
             }) 
 const panesDisconnected = [{
       menuItem: <Menu.Item key='About'>About</Menu.Item>,
-      render: () => <p> <br/> {loremIpsum}</p>,}]
+      render: () => <About/>,}]
 
 const panesConnecting = [{
       menuItem: <Menu.Item key='About'>About</Menu.Item>,
-      render: () => <p> <br/>  {loremIpsum}</p>,}]
+      render: () => <About/>,}]
 
    
-const loremIpsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-
 

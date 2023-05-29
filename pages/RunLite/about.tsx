@@ -2,7 +2,7 @@ import React,  {  } from 'react'
 
 
 export const About = () => (
-  <p> <br/>  {loremIpsum}</p>
+  <p> <br/>  { 'To Be Developed'}</p>
 )
 
 
