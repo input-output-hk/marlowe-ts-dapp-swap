@@ -2,7 +2,7 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { MeshProvider } from "@meshsdk/react";
 
-import './Menu/menu.css'
+import '../Components/Menu/menu.css'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

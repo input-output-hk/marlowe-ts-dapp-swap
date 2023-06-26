@@ -66,15 +66,15 @@ const menuInitializedSwaps = (initializedSwaps:InitializedSwap[]) => (initialize
           render: () => <InitializedSwaps initializedSwaps={initializedSwaps}/>,
          }) 
 
-const menuProvisionnedSwaps = (provisionnedSwaps) => (provisionnedSwaps.length === 0 ) ? {} : 
+const menuProvisionnedSwaps = (provisionnedSwaps) => (provisionnedSwaps.length !== 0 ) ? {} : 
          ({ menuItem: <Menu.Item key='provisionned'>Provisionned<Label>{provisionnedSwaps.length}</Label></Menu.Item>,
            render: () => <ProvisionnedSwaps />,
           }) 
-const menuClosedSwaps = (closedSwaps) => (closedSwaps.length === 0 ) ? {} : 
+const menuClosedSwaps = (closedSwaps) => (closedSwaps.length !== 0 ) ? {} : 
           ({ menuItem: <Menu.Item key='closed'>Closed<Label>{closedSwaps.length}</Label></Menu.Item>,
             render: () => <ClosedSwaps />,
            }) 
-const menuRequestedSwaps = (closedSwaps) => (closedSwaps.length === 0 ) ? {} : 
+const menuRequestedSwaps = (closedSwaps) => (closedSwaps.length !== 0 ) ? {} : 
            ({ menuItem: <Menu.Item key='requested'>Requested<Label>{closedSwaps.length}</Label></Menu.Item>,
              render: () => <RequestedSwaps />,
             }) 

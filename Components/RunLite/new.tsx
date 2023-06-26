@@ -55,7 +55,7 @@ export const NewContract = ({state }) => {
                        setSubmitSucceed('')},
           ({ contractId }) => 
                      { 
-                       setSubmitSucceed('Contract created. Contract ID: ' + contractId)
+                       setSubmitSucceed('Contract created. Contract ID: ' + contractId + '#1'  ) 
                        setSubmitFailed('') })
       )()
   };

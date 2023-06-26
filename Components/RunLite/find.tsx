@@ -2,7 +2,7 @@
 import React from 'react'
 import {Button, Container, Divider, Form, Input, Label, Message, SemanticCOLORS, Table} from 'semantic-ui-react'
 import * as Marlowe from 'marlowe-ts-sdk/src/runtime/endpoints';
-import {Connected} from 'pages/Hooks/Wallet';
+import {Connected} from 'Components/Hooks/Wallet';
 import {ContractId, contractId, unContractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
 
 import {pipe} from 'fp-ts/lib/function';

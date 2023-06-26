@@ -1,11 +1,11 @@
 import Head from "next/head";
 
-import  { ConnectionWallet } from "./Menu/Menu";
+import  { ConnectionWallet } from "../Components/Menu/Menu";
 import { Container, Grid, Menu } from "semantic-ui-react";
-import { SwapTabs } from "./Swaps/tabs";
+import { SwapTabs } from "../Components/Swaps/tabs";
 import { Component, useState } from "react";
-import { RunLiteTabs } from "./RunLite/tabs";
-import  Logo  from './Menu/marlowe-logo.svg'
+import { RunLiteTabs } from "../Components/RunLite/tabs";
+import  Logo  from '../Components/Menu/marlowe-logo.svg'
 
 export default function Home() {
 

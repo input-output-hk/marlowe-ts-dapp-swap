@@ -6,7 +6,7 @@ import { AssetExtended, BrowserWallet, resolveFingerprint } from '@meshsdk/core'
 import { constant, pipe } from 'fp-ts/lib/function'
 import {SDK, cip30SDK} from 'marlowe-ts-sdk/src/runtime/'
 
-import { SwapServices, dappName, runtimeUrl, swapServices } from 'pages/Swaps/service'
+import { SwapServices, dappName, runtimeUrl, swapServices } from 'Components/Swaps/service'
 
 export type BroswerExtensionDetails = {
     name: string,
