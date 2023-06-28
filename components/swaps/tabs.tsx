@@ -12,28 +12,28 @@ import { Segment, Tab } from 'semantic-ui-react'
 import { ProvisionnedSwaps } from './provisionned'
 import { NewSwap } from './new'
 import { RequestedSwaps } from './requested'
-import { useWalletState } from '../Hooks/Wallet'
+import { Connected, useWalletState } from '../hooks/Wallet'
 import { InitializedSwaps } from './initialized'
 import { pipe } from 'fp-ts/lib/function'
 import { ClosedSwaps } from './closed'
-import { InitializedSwap, RequestedSwap, ProvisionnedSwap, ClosedSwap, SwapServices } from './service'
+import { MySwap, SwapServices } from './service'
 import { About } from './about'
 
 
 const fetchInitializedSwaps = (swapServices : SwapServices ) => 
 {console.log("here")
- const noInitializedSwap : InitializedSwap[] = []
- return pipe( swapServices.mySwaps.initializedSwaps
+ const noInitializedSwap : MySwap[] = []
+ return pipe( swapServices.mySwaps.initialized
    , TE.fold( a => T.of(noInitializedSwap),a => T.of(a))) ()
    
 }
 
 export const SwapTabs = () => { 
   let walletState = useWalletState();
-  let [requestedSwaps, setRequestedSwap]       = useState<RequestedSwap[]>([]);
-  let [initializedSwaps, setInitializedSwaps]  = useState<InitializedSwap[]>([]);
-  let [provisionnedSwaps, setProvisionnedSwap] = useState<ProvisionnedSwap[]>([]);
-  let [closedSwaps, setClosedSwap]             = useState<ClosedSwap[]>([]);
+  let [requestedSwaps, setRequestedSwap]       = useState<MySwap[]>([]);
+  let [initializedSwaps, setInitializedSwaps]  = useState<MySwap[]>([]);
+  let [provisionnedSwaps, setProvisionnedSwap] = useState<MySwap[]>([]);
+  let [closedSwaps, setClosedSwap]             = useState<MySwap[]>([]);
   console.log(initializedSwaps)
   const panes = () => { switch (walletState.type) {
     case 'disconnected' : return panesDisconnected 
@@ -44,7 +44,7 @@ export const SwapTabs = () => {
                   menuRequestedSwaps(requestedSwaps),
                   { menuItem: <Menu.Item key='new'><Icon name='add circle' color='grey' size='large' /> New  </Menu.Item>,
                     render: () => <NewSwap state={walletState}/>}, 
-                  menuInitializedSwaps(initializedSwaps),
+                  menuInitializedSwaps(initializedSwaps,walletState),
                   menuProvisionnedSwaps(provisionnedSwaps),
                   menuClosedSwaps (closedSwaps)
                 ]
@@ -61,9 +61,9 @@ export const SwapTabs = () => {
    
 } 
 
-const menuInitializedSwaps = (initializedSwaps:InitializedSwap[]) => (initializedSwaps.length === 0 ) ? {} : 
+const menuInitializedSwaps = (initializedSwaps:MySwap[],connected :Connected) => (initializedSwaps.length === 0 ) ? {} : 
         ({ menuItem: <Menu.Item key='initialized'>Initialized<Label>{initializedSwaps.length}</Label></Menu.Item>,
-          render: () => <InitializedSwaps initializedSwaps={initializedSwaps}/>,
+          render: () => <InitializedSwaps initializedSwaps={initializedSwaps} connectedExtension={connected}/>,
          }) 
 
 const menuProvisionnedSwaps = (provisionnedSwaps) => (provisionnedSwaps.length !== 0 ) ? {} : 

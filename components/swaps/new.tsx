@@ -8,7 +8,7 @@ import {
   Form,
   TextArea,
 } from 'semantic-ui-react'
-import { Connected } from '../Hooks/Wallet'
+import { Connected } from '../hooks/Wallet'
 import * as A from 'fp-ts/Array'
 import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'
@@ -54,10 +54,10 @@ export const NewSwap = ({state }) => {
       ( swapServices.initialize
           (addressBech32 (recipient) )
           ({ note : note
-           , self : { depositTimeout   : pipe(Date.now(),addDays(1),datetoTimeout)      
-                  , token : token(asset.policyId,asset.assetName)
+           , provider : { depositTimeout   : pipe(Date.now(),addDays(1),datetoTimeout)      
+                  , token : token(asset.policyId == "lovelace" ? "":asset.policyId,asset.assetName)
                   , amount : amount }
-           , b : { depositTimeout : pipe(Date.now(),addDays(2),datetoTimeout)
+           , swapper : { depositTimeout : pipe(Date.now(),addDays(2),datetoTimeout)
                  , token : token(policyIdToSwap,tokenNameToSwap)
                  , amount : amountToSwap }}) 
           

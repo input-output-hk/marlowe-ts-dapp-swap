@@ -8,7 +8,7 @@ import {
   Form,
   TextArea,
 } from 'semantic-ui-react'
-import { Connected } from '../Hooks/Wallet'
+import { Connected } from '../hooks/Wallet'
 import * as A from 'fp-ts/Array'
 import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'

@@ -6,7 +6,8 @@ import * as O from 'fp-ts/Option'
 
 import { Image } from 'semantic-ui-react'
 import { pipe } from 'fp-ts/lib/function'
-import { Connected, useWalletState } from '../Hooks/Wallet'
+import { Connected, useWalletState } from '../hooks/Wallet'
+import { formatADAs } from 'components/common/tokens'
 
 
 
@@ -59,14 +60,14 @@ export const ConnectedWallet = ({state}) => {
           ,O.map((v) => parseInt (v.quantity,10))
           ,O.getOrElse(() => 0))
 
-  const adas = (Math.trunc(lovelaceBalance / 1_000_000))
-  const decimalADAs = (lovelaceBalance % 1_000_000)
+  const [adas,decimalADAs,currrency] = formatADAs (BigInt(lovelaceBalance), isMainnnet)
+  
   return  lovelaceBalance > 0 ? (
     <Dropdown
       trigger = {<><span className='small'><Image src={extensionSelectedDetails.icon} className="walletIcon" alt="" 
                     />{(adas).toString()}.</span>
                      <span  style={{fontSize: "smaller"}}>{decimalADAs + ' '} </span> 
-                     <span  style={{fontWeight: 'bold',fontSize: "smaller"}}> {isMainnnet ? ' ₳' : ' t₳' }</span>
+                     <span  style={{fontWeight: 'bold',fontSize: "smaller"}}> {' ' + currrency}</span>
                 </>}
       item
       className='icon'>
@@ -80,7 +81,7 @@ export const ConnectedWallet = ({state}) => {
   ) : (
     <Dropdown
       trigger = {<><span className='small'><Image src={extensionSelectedDetails.icon}  className="walletIcon" alt="" 
-                    />0 {isMainnnet ? ' ₳ ' : ' t₳'}</span>
+                    />0 {' ' + currrency}</span>
                 </>}
       item
       className='icon'>

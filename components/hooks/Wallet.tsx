@@ -6,7 +6,7 @@ import { AssetExtended, BrowserWallet, resolveFingerprint } from '@meshsdk/core'
 import { constant, pipe } from 'fp-ts/lib/function'
 import {SDK, cip30SDK} from 'marlowe-ts-sdk/src/runtime/'
 
-import { SwapServices, dappName, runtimeUrl, swapServices } from 'Components/Swaps/service'
+import { SwapServices, dAppName, runtimeUrl, swapServices } from 'components/swaps/service'
 
 export type BroswerExtensionDetails = {
     name: string,
@@ -54,14 +54,19 @@ export const useWalletState : () => WalletState =
   const isMainnnet = pipe(useNetwork (), a => a == 1 )
   const installedExtensions = useInstalledWalletExtensions ()
   const assetBalances = useAssetBalance()
-        
+  const sdkCIP30 = cip30SDK(runtimeUrl)      
   const connectOption 
     = pipe(  O.Do
           ,  O.bind ( 'extensionSelectedDetails' ,  () => pipe (installedExtensions, A.findFirst(w => w.name == connectedWalletName)))
           ,  O.map (({extensionSelectedDetails}) => ({ type : 'connected' 
                                       , isMainnnet : isMainnnet
-                                      , swapServices : swapServices(cip30SDK(runtimeUrl)(connectedWalletName))(dappName)
-                                      , marloweSDK : cip30SDK(runtimeUrl)(connectedWalletName)
+                                      , swapServices : 
+                                          swapServices
+                                            (sdkCIP30(connectedWalletName))
+                                            (dAppName) 
+                                            ({ provider :"Provider NFT Handle"
+                                             , swapper : "Swapper NFT Handle" })
+                                      , marloweSDK : sdkCIP30(connectedWalletName)
                                       , meshExtensionSDK : connectedWalletInstance
                                       , extensionSelectedDetails : extensionSelectedDetails
                                       , assetBalances : assetBalances

@@ -1,7 +1,7 @@
 import React,  {  } from 'react'
 import { Container, Icon, Menu } from 'semantic-ui-react'
 import { Tab } from 'semantic-ui-react'
-import { useWalletState } from '../Hooks/Wallet'
+import { useWalletState } from '../hooks/Wallet'
 import { About } from './about'
 import { NewContract } from './new'
 import { FindContract } from './find'
