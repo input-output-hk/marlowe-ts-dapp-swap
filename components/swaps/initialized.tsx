@@ -5,7 +5,7 @@ import React,  { useEffect, useState } from 'react'
 import * as A from 'fp-ts/Array'
 import { Button, Icon, Table } from 'semantic-ui-react'
 import { unContractId } from 'marlowe-ts-sdk/src/runtime/contract/id';
-import { Token, ada } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token';
+import { Token, TokenValue } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token';
 import { MySwap } from './service';
 import { formatADAs } from 'components/common/tokens';
 import { timeoutToDate } from 'components/common/date';
@@ -42,12 +42,12 @@ export const InitializedSwaps = ({initializedSwaps,connectedExtension }) => {
                        <a target="_blank" 
                            rel="noopener noreferrer" 
                            href={'https://preview.cardanoscan.io/tokenPolicy/' + unPolicyId(swap.rolePolicyId)}>
-                            {"\""+swap.swapper.roleName+ "\"'"}s Owner
+                            {"\""+swap.request.swapper.roleName+ "\"'"}s Owner
                        </a>      
                      </Table.Cell>
-                      <Table.Cell>{displayToken ( swap.swapper.amount ,swap.swapper.token,connected.isMainnnet) }</Table.Cell>
-                      <Table.Cell>{displayToken ( swap.provider.amount, swap.provider.token,connected.isMainnnet)}</Table.Cell>
-                      <Table.Cell>{pipe(timeoutToDate(swap.provider.depositTimeout),(date) => format(date,"yyyy-MM-dd'T'hh:mm"))}</Table.Cell>
+                      <Table.Cell>{displayToken ( swap.request.swapper.value,connected.isMainnnet) }</Table.Cell>
+                      <Table.Cell>{displayToken ( swap.request.provider.value,connected.isMainnnet)}</Table.Cell>
+                      <Table.Cell>{pipe(timeoutToDate(swap.request.provider.depositTimeout),(date) => format(date,"yyyy-MM-dd'T'hh:mm"))}</Table.Cell>
                       <Table.Cell collapsing>
                       <Button.Group>
                         <Button>Cancel</Button>
@@ -62,11 +62,11 @@ export const InitializedSwaps = ({initializedSwaps,connectedExtension }) => {
 }
 
 
-const displayToken = (amount:bigint, token: Token,isMainnnet : Boolean) : string => {
-    if (token.currency_symbol === '') 
+const displayToken = (tokenValue: TokenValue,isMainnnet : Boolean) : string => {
+    if (tokenValue.token.currency_symbol === '') 
     {
-      let [adas,lovelaces,currency] = formatADAs (amount,isMainnnet)
+      let [adas,lovelaces,currency] = formatADAs (tokenValue.amount,isMainnnet)
       return adas + '.' + lovelaces + ' ' + currency
     }  
-    else { return amount + ' ' + token.token_name }
+    else { return tokenValue.amount + ' ' + tokenValue.token.token_name }
 }

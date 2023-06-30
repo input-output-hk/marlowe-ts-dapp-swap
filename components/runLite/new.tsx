@@ -19,7 +19,7 @@ import { token } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/co
 import { addressBech32 } from 'marlowe-ts-sdk/src/runtime/common/address'
 import { MarloweJSONCodec } from 'marlowe-ts-sdk/src/adapter/json'
 import { Contract } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract'
-import {formatValidationErrors} from 'io-ts-reporters'
+import {formatValidationErrors} from 'jsonbigint-io-ts-reporters'
 
 export const NewContract = ({state }) => {
   const connectedWallet : Connected = state
@@ -33,7 +33,7 @@ export const NewContract = ({state }) => {
 
   const submit = async (event) => {
     event.preventDefault();
-    const {marloweSDK} = connectedWallet
+    const {runtime} = connectedWallet
 
     await pipe
       ( TE.Do 
@@ -42,18 +42,12 @@ export const NewContract = ({state }) => {
               TE.fromEither(pipe( Contract.decode(contractAsJSON)
                                 , E.mapLeft(formatValidationErrors))))
       , TE.chainW (({contractTyped}) => 
-                    marloweSDK.commands.initialise
-                        ({ contract:  contractTyped
-                                    , roles: null
-                                    , version: 'v1'
-                                    , metadata: {}
-                                    , tags : {  }
-                                    , minUTxODeposit: 3_000_000})) 
+              runtime.initialise({ contract:  contractTyped})) 
       , TE.match (
           (error) => { console.log(error)
                        setSubmitFailed(JSON.stringify(error))
                        setSubmitSucceed('')},
-          ({ contractId }) => 
+          (contractId) => 
                      { 
                        setSubmitSucceed('Contract created. Contract ID: ' + contractId + '#1'  ) 
                        setSubmitFailed('') })

@@ -15,7 +15,7 @@ import * as O from 'fp-ts/Option'
 import { AssetExtended } from '@meshsdk/core'
 
 import { datetoTimeout } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when'
-import { token } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token'
+import { token, tokenValue } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token'
 import { addressBech32 } from 'marlowe-ts-sdk/src/runtime/common/address'
 
 
@@ -54,12 +54,12 @@ export const NewSwap = ({state }) => {
       ( swapServices.initialize
           (addressBech32 (recipient) )
           ({ note : note
-           , provider : { depositTimeout   : pipe(Date.now(),addDays(1),datetoTimeout)      
-                  , token : token(asset.policyId == "lovelace" ? "":asset.policyId,asset.assetName)
-                  , amount : amount }
-           , swapper : { depositTimeout : pipe(Date.now(),addDays(2),datetoTimeout)
-                 , token : token(policyIdToSwap,tokenNameToSwap)
-                 , amount : amountToSwap }}) 
+           , provider : 
+              { depositTimeout   : pipe(Date.now(),addDays(1),datetoTimeout)      
+              , value : tokenValue (amount)(token(asset.policyId == "lovelace" ? "":asset.policyId,asset.assetName))}
+           , swapper : 
+              { depositTimeout : pipe(Date.now(),addDays(2),datetoTimeout)
+              , value : tokenValue (amount) (token(policyIdToSwap,tokenNameToSwap))}}) 
           
       , TE.match (
           (error) => { console.log(error)

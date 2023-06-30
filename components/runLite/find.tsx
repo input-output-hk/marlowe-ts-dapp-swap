@@ -1,7 +1,7 @@
 
 import React from 'react'
 import {Button, Container, Divider, Form, Input, Label, Message, SemanticCOLORS, Table} from 'semantic-ui-react'
-import * as Marlowe from 'marlowe-ts-sdk/src/runtime/endpoints';
+import * as Marlowe from 'marlowe-ts-sdk/src/runtime/';
 import {Connected} from 'components/hooks/Wallet';
 import {ContractId, contractId, unContractId} from 'marlowe-ts-sdk/src/runtime/contract/id';
 
@@ -38,14 +38,10 @@ const ShowContract = ({ contract, walletState }: Props & { contract : ContractDe
   const [currentAction, setCurrentAction] = React.useState<ContractAction>();
   const [isSubmitting, setSubmitting] = React.useState(false);
   async function advanceContract(isNotify : boolean = false) {
-    const {marloweSDK} = walletState;
+    const {runtime} = walletState;
     setSubmitting(true);
     try {
-      const result = await marloweSDK.commands.applyInputs(contract.contractId)({ version: "v1"
-                                                                                , inputs: isNotify ? ['input_notify' ] : []
-                                                                                , metadata: {}
-                                                                                , tags : {}
-                                                                                })();
+      const result = await runtime.applyInputs(contract.contractId)((next) => ({inputs: isNotify ? ['input_notify' ] : [] }))();
       switch (result._tag) {
         case "Left":
           console.log(result.left)
@@ -204,12 +200,7 @@ const DepositForm = ({ contractId, walletState, setSubmitting }: Props & { contr
           address: accountAddress,
         },
       };
-      const result = await walletState.marloweSDK.commands.applyInputs(contractId)({
-        version: "v1",
-        inputs: [input],
-        metadata: {},
-        tags: {},
-      })();
+      const result = await walletState.runtime.applyInputs(contractId)((next) => ({inputs: [input]}))();
       switch (result._tag) {
         case "Left":
           alert(result.left);
@@ -252,12 +243,7 @@ const ChoiceForm = ({ contractId, walletState, setSubmitting }: Props & { contra
           }
         },
       };
-      const result = await walletState.marloweSDK.commands.applyInputs(contractId)({
-        version: "v1",
-        inputs: [input],
-        metadata: {},
-        tags: {},
-      })();
+      const result = await walletState.runtime.applyInputs(contractId)((ext) => ({inputs: [input]}))()
       switch (result._tag) {
         case "Left":
           alert(result.left);
@@ -280,14 +266,14 @@ const ChoiceForm = ({ contractId, walletState, setSubmitting }: Props & { contra
   );
 };
 
-const FindContractSearch = ({ walletState: { marloweSDK }, setContract }: Props & { setContract: (contract: ContractDetails) => void }) => {
+const FindContractSearch = ({ walletState: { runtime }, setContract }: Props & { setContract: (contract: ContractDetails) => void }) => {
   const [inputContractId, setContractId] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | DecodingError>();
   const findContract = async () => {
     setIsLoading(true);
     try {
-        const result = await marloweSDK.restAPI.contracts.contract.get(contractId(inputContractId))();
+        const result = await runtime.restAPI.contracts.contract.get(contractId(inputContractId))();
         switch (result._tag) {
           case "Left":
             setError(result.left);
