@@ -15,8 +15,8 @@ import { Tag } from 'marlowe-ts-sdk/src/runtime/common/metadata/tag'
 import { PolicyId } from 'marlowe-ts-sdk/src/runtime/common/policyId'
 
 
-export const runtimeUrl = 'http://services.marlowe.run:23780'  
-export const dAppName = 'dApp.swap.L1.v1.2'
+export const runtimeUrl = 'http://marlowe-runtime-preview-web.scdev.aws.iohkdev.io'  
+export const dAppName = 'dApp.swap.L1.v1.3'
 
 export type SwapState = 'initialised' | 'provisionned' | 'requested' | 'done'
 

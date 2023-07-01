@@ -1,9 +1,9 @@
-import React,  { Component } from 'react'
+import React,  { Component, useEffect, useState } from 'react'
 import { Dropdown, Loader, Menu } from 'semantic-ui-react'
 
 import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
-
+import * as E from 'fp-ts/Either'
 import { Image } from 'semantic-ui-react'
 import { pipe } from 'fp-ts/lib/function'
 import { Connected, useWalletState } from '../hooks/Wallet'
@@ -52,15 +52,15 @@ export const ConnectWallet = ({ state }) => {
 
 export const ConnectedWallet = ({state}) => {
   const connected : Connected = state
-  const { disconnect, extensionSelectedDetails , assetBalances , isMainnnet} = connected;
+  const { disconnect, extensionSelectedDetails , runtime , isMainnnet} = connected;
   console.log('state' , state)
-  const lovelaceBalance = 
-      pipe(assetBalances 
-          ,A.findFirst((v) => v.unit === 'lovelace') 
-          ,O.map((v) => parseInt (v.quantity,10))
-          ,O.getOrElse(() => 0))
+  const [lovelaceBalance, setLovelaceBalance] = useState<bigint>(0n)
+  console.log('lovelaceBalance' , lovelaceBalance)
+  useEffect(() => {
+    (runtime.wallet.getLovelaces()).then((result) => pipe(result,E.getOrElse(() => 0n),setLovelaceBalance))
+  }, [runtime]);
 
-  const [adas,decimalADAs,currrency] = formatADAs (BigInt(lovelaceBalance), isMainnnet)
+  const [adas,decimalADAs,currrency] = formatADAs (lovelaceBalance, isMainnnet)
   
   return  lovelaceBalance > 0 ? (
     <Dropdown

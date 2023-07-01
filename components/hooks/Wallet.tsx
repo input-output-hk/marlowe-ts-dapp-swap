@@ -107,24 +107,4 @@ export const useRuntime = () => {
   return runtimeOption;
 };
 
-// const getAssets = async (connectedWalletInstance :BrowserWallet) => {
-//   const balance = await connectedWalletInstance.getBalance();
-//   return balance
-//     .map((v) => {
-//       const policyId = v.unit.slice(0, POLICY_ID_LENGTH);
-//       const assetName = v.unit.slice(POLICY_ID_LENGTH);
-//       const fingerprint = resolveFingerprint(policyId, assetName);
-
-//       return {
-//         unit: v.unit,
-//         policyId,
-//         assetName: toUTF8(assetName),
-//         fingerprint,
-//         quantity: v.quantity
-//       };
-//     });
-// }
-// const POLICY_ID_LENGTH = 56;
-// const toUTF8 = (hex: string) => Buffer.from(hex, 'hex').toString('utf-8');
-
 

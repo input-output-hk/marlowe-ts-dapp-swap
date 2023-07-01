@@ -43,7 +43,7 @@ export const SwapTabs = () => {
                   { menuItem: <Menu.Item key='About'>About</Menu.Item>, render: () => <About/>},
                   menuRequestedSwaps(requestedSwaps),
                   { menuItem: <Menu.Item key='new'><Icon name='add circle' color='grey' size='large' /> New  </Menu.Item>,
-                    render: () => <NewSwap state={walletState}/>}, 
+                    render: () => <NewSwap state={ (walletState as Connected)}/>}, 
                   menuInitializedSwaps(initializedSwaps,walletState),
                   menuProvisionnedSwaps(provisionnedSwaps),
                   menuClosedSwaps (closedSwaps)

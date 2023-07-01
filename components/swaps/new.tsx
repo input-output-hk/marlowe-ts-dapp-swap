@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/lib/function'
-import React,  { useState } from 'react'
+import React,  { useEffect, useState } from 'react'
 import { Message } from 'semantic-ui-react'
 import { addDays } from 'date-fns/fp'
 import {format} from 'date-fns'
@@ -13,53 +13,58 @@ import * as A from 'fp-ts/Array'
 import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'
 import { AssetExtended } from '@meshsdk/core'
-
+import * as E from 'fp-ts/Either'
 import { datetoTimeout } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when'
-import { token, tokenValue } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token'
+
 import { addressBech32 } from 'marlowe-ts-sdk/src/runtime/common/address'
+import { TokenValue,adaValue, tokenValue } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/tokenValue'
+import * as TV from  'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/tokenValue'
+import { Token, adaToken, token } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token'
+const findTokenValue = (tokenValues : TokenValue[]) => (token:Token) => 
+  pipe(tokenValues
+      , A.findFirst((w : TokenValue) => w.token === token)
+      , O.getOrElse(() => adaValue (0n)))
 
+export const NewSwap = ({state}) => {
 
-export const NewSwap = ({state }) => {
-  const connectedWallet : Connected = state
-  const findAssetOrProvideDefault = (unit) => pipe(connectedWallet.assetBalances
-    , A.findFirst((w : AssetExtended) => w.unit === unit) 
-    , O.getOrElse(() => 
-        ({ unit: "lovelace"
-        , policyId: ""
-        , assetName: ""
-        , fingerprint: ""
-        , quantity: "0"}) ))
-  const lovelaceAsset = findAssetOrProvideDefault ("lovelace")
+  const connected : Connected = state
+  const {runtime} = connected
           
-  const getMaxAmount = (asset) => BigInt(asset.quantity)
+  const getMaxAmount = (tokenValue:TokenValue) => tokenValue.amount
   
   const defaultDeadlines = pipe(Date.now(),(date) => addDays(5,date),(date) => format(date,"yyyy-MM-dd'T'hh:mm"))
-  const [amount ,setAmount] = useState<bigint>(0n)
-  const [asset ,setAsset] = useState<AssetExtended>(lovelaceAsset)
+  const [tokenValues ,setTokenValues] = useState<TokenValue[]>([])
 
-  const [amountToSwap ,setAmountToSwap] = useState<bigint>(0n)
-  const [policyIdToSwap ,setPolicyIdToSwap] = useState<string>('')
-  const [tokenNameToSwap ,setTokenNameToSwap] = useState<string>('')
-  const [recipient ,setRecipient] = useState<string>('')
+  const [providerAmount ,setProviderAmount] = useState<bigint>(0n)
+  const [providerToken ,setProviderToken] = useState<Token>(adaToken)
+
+  const [swapperAmount ,setSwapperAmount] = useState<bigint>(0n)
+  const [swapperTokenCurrencySymbol ,setSwapperTokenCurrencySymbol] = useState<string>('')
+  const [swapperTokenName ,setSwapperTokenName] = useState<string>('')
+  const [swapperAddress ,setSwapperAddress] = useState<string>('')
   const [note ,setNote] = useState<string>('')
   const [submitFailed,setSubmitFailed] = useState<string>('')
   const [submitSucceed,setSubmitSucceed] = useState<string>('')
 
+  useEffect(() => {
+    console.log("getTokenValues")
+    pipe(runtime.wallet.getTokenValues,TE.map(values => setTokenValues(values)) )()
+  }, [runtime]);
 
   const submit = async (event) => {
     event.preventDefault();
-    const {swapServices} = connectedWallet
+    const {swapServices} = state
 
     await pipe
       ( swapServices.initialize
-          (addressBech32 (recipient) )
+          (addressBech32 (swapperAddress) )
           ({ note : note
            , provider : 
               { depositTimeout   : pipe(Date.now(),addDays(1),datetoTimeout)      
-              , value : tokenValue (amount)(token(asset.policyId == "lovelace" ? "":asset.policyId,asset.assetName))}
+              , value : tokenValue (providerAmount)(providerToken)}
            , swapper : 
               { depositTimeout : pipe(Date.now(),addDays(2),datetoTimeout)
-              , value : tokenValue (amount) (token(policyIdToSwap,tokenNameToSwap))}}) 
+              , value : tokenValue (swapperAmount) (token(swapperTokenCurrencySymbol,swapperTokenName))}}) 
           
       , TE.match (
           (error) => { console.log(error)
@@ -72,10 +77,12 @@ export const NewSwap = ({state }) => {
       )()
   };
 
-  console.log ("Render New Swap, current asset" , asset)
+  console.log ("Render New Swap, current asset" , tokenValues)
   const fieldsetStyle = {
     border: '0px solid rgba(0, 0, 0, 0.05)', 
   };
+
+
   return (<>
       <br/>
       <Form onSubmit={submit} success={submitSucceed !== ''} error={submitFailed !== ''}>
@@ -83,14 +90,14 @@ export const NewSwap = ({state }) => {
       <fieldset style={fieldsetStyle}>       
         <Form.Group  widths="equal" > 
           <Form.Field
-              label="Asset"  
+              label="Token"  
               control='select'
-              value={asset.unit}
-              onChange= {(e) => {setAsset(findAssetOrProvideDefault(e.target.value));setAmount(getMaxAmount(asset))}} 
-            > {connectedWallet.assetBalances.map(assetBalance => 
-                  <option key={assetBalance.unit} value={assetBalance.unit} >
-                    {assetBalance.assetName === '' ? 'Lovelaces':
-                      assetBalance.assetName + ' (' + assetBalance.fingerprint+')'}
+              value={providerToken}
+              onChange= {(e) => {setProviderToken(token(e.target.value[0],e.target.value[1]));setProviderAmount(getMaxAmount(e.target.value[2]))}} 
+            > {tokenValues.map(tokenValue => 
+                  <option key={TV.toString(tokenValue)} value={[tokenValue.token.currency_symbol,tokenValue.token.token_name,tokenValue.amount.toString()]} >
+                    {tokenValue.token.currency_symbol === '' ? 'Lovelaces':
+                      tokenValue.token.token_name + ' (' + tokenValue.token.currency_symbol+')'}
                   </option>
                  )
               }
@@ -100,9 +107,9 @@ export const NewSwap = ({state }) => {
               label="Amount" 
               type='number' 
               step='0' 
-              max={getMaxAmount(asset)}
+              max={findTokenValue(tokenValues)(providerToken).amount}
               min='0'
-              onChange= {(e) => {setAmount(BigInt(e.target.value))}} 
+              onChange= {(e) => {setProviderAmount(BigInt(e.target.value))}} 
               defaultValue="0"
               
                 />
@@ -112,16 +119,16 @@ export const NewSwap = ({state }) => {
       <fieldset style={fieldsetStyle}>        
         <Form.Group widths='equal'>  
           <Form.Input
-            id='policyId' 
-            label="Policy Id"  
-            value={policyIdToSwap} 
-            onChange= {(e) => {setPolicyIdToSwap(e.target.value)}} 
+            id='CurrencySymbol' 
+            label="Currency Symbol"  
+            value={swapperTokenCurrencySymbol} 
+            onChange= {(e) => {setSwapperTokenCurrencySymbol(e.target.value)}} 
              />
           <Form.Input
-            id='tokenName' 
+            id='SwapperTokenName' 
             label="Token Name"  
-            value={tokenNameToSwap} 
-            onChange= {(e) => {setTokenNameToSwap(e.target.value)}} 
+            value={swapperTokenName} 
+            onChange= {(e) => {setSwapperTokenName(e.target.value)}} 
              />
           </Form.Group>
           <Form.Group >
@@ -130,18 +137,18 @@ export const NewSwap = ({state }) => {
             min="0"
             defaultValue="0"
             type='number' 
-            onChange= {(e) => {setAmountToSwap(BigInt(e.target.value))}}   
+            onChange= {(e) => {setSwapperAmount(BigInt(e.target.value))}}   
             width={4}  />
           
         </Form.Group>
       </fieldset>
         <Form.Group >
           <Form.Input 
-            id='recipient' 
+            id='SwapperAddress' 
             label='Adressed to' 
-            placeholder='Recipient address'
-            onChange= {(e) => {setRecipient(e.target.value)}} 
-            value={recipient} 
+            placeholder='Swapper Address'
+            onChange= {(e) => {setSwapperAddress(e.target.value)}} 
+            value={swapperAddress} 
             width={10} />
         
         </Form.Group>  
@@ -183,6 +190,7 @@ export const NewSwap = ({state }) => {
       </>
     )
 }
+
 
 
 
