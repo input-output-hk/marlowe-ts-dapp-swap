@@ -5,16 +5,17 @@ import React,  { useEffect, useState } from 'react'
 import * as A from 'fp-ts/Array'
 import { Button, Icon, Table } from 'semantic-ui-react'
 import { unContractId } from 'marlowe-ts-sdk/src/runtime/contract/id';
-import { Token, TokenValue } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token';
+import { Token } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token';
 import { MySwap } from './service';
 import { formatADAs } from 'components/common/tokens';
 import { timeoutToDate } from 'components/common/date';
 import {format} from 'date-fns'
 import { unPolicyId } from 'marlowe-ts-sdk/src/runtime/common/policyId';
+import { TokenValue } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/tokenValue';
 
 export const InitializedSwaps = ({initializedSwaps,connectedExtension }) => {
   console.log("initializedSwaps",initializedSwaps)
-  const connected : Connected = connectedExtension
+  const {isMainnnet,swapServices} : Connected = connectedExtension
   return (<Table compact celled striped>
     <Table.Header>
       <Table.Row>
@@ -35,24 +36,24 @@ export const InitializedSwaps = ({initializedSwaps,connectedExtension }) => {
                       <Table.Cell>
                         <a target="_blank" 
                            rel="noopener noreferrer" 
-                           href={'http://marlowe.palas87.es:8002/contractView?tab=info&contractId=' + encodeURIComponent(unContractId(swap.contractId))}> 
+                           href={'https://preprod.marlowescan.com/contractView?tab=info&contractId=' + encodeURIComponent(unContractId(swap.contractId))}> 
                            <Icon link name='info circle' /> </a> </Table.Cell>
                       <Table.Cell>{swap.note}</Table.Cell>
                       <Table.Cell>
                        <a target="_blank" 
                            rel="noopener noreferrer" 
-                           href={'https://preview.cardanoscan.io/tokenPolicy/' + unPolicyId(swap.rolePolicyId)}>
+                           href={'https://preprod.cardanoscan.io/tokenPolicy/' + unPolicyId(swap.rolePolicyId)}>
                             {"\""+swap.request.swapper.roleName+ "\"'"}s Owner
                        </a>      
                      </Table.Cell>
-                      <Table.Cell>{displayToken ( swap.request.swapper.value,connected.isMainnnet) }</Table.Cell>
-                      <Table.Cell>{displayToken ( swap.request.provider.value,connected.isMainnnet)}</Table.Cell>
+                      <Table.Cell>{displayToken ( swap.request.swapper.value,isMainnnet) }</Table.Cell>
+                      <Table.Cell>{displayToken ( swap.request.provider.value,isMainnnet)}</Table.Cell>
                       <Table.Cell>{pipe(timeoutToDate(swap.request.provider.depositTimeout),(date) => format(date,"yyyy-MM-dd'T'hh:mm"))}</Table.Cell>
                       <Table.Cell collapsing>
                       <Button.Group>
                         <Button>Cancel</Button>
                         <Button.Or />
-                        <Button positive>Provision</Button>
+                        <Button positive onClick={swapServices.provision(swap)}>Provision</Button>
                       </Button.Group>
                       </Table.Cell>
                 </Table.Row>)

@@ -14,49 +14,41 @@ import { NewSwap } from './new'
 import { RequestedSwaps } from './requested'
 import { Connected, useWalletState } from '../hooks/Wallet'
 import { InitializedSwaps } from './initialized'
-import { pipe } from 'fp-ts/lib/function'
+import { constVoid, pipe } from 'fp-ts/lib/function'
 import { ClosedSwaps } from './closed'
 import { MySwap, SwapServices } from './service'
 import { About } from './about'
+import { Observable, distinctUntilChanged, from, interval, map } from 'rxjs'
+
+import { Subscribe, bind } from '@react-rxjs/core'
+import { Props } from 'next/script'
 
 
-const fetchInitializedSwaps = (swapServices : SwapServices ) => 
-{console.log("here")
- const noInitializedSwap : MySwap[] = []
- return pipe( swapServices.mySwaps.initialized
-   , TE.fold( a => T.of(noInitializedSwap),a => T.of(a))) ()
-   
-}
+
+const noInitializedSwap : MySwap[] = []
+
 
 export const SwapTabs = () => { 
-  let walletState = useWalletState();
-  let [requestedSwaps, setRequestedSwap]       = useState<MySwap[]>([]);
-  let [initializedSwaps, setInitializedSwaps]  = useState<MySwap[]>([]);
-  let [provisionnedSwaps, setProvisionnedSwap] = useState<MySwap[]>([]);
-  let [closedSwaps, setClosedSwap]             = useState<MySwap[]>([]);
-  console.log(initializedSwaps)
-  const panes = () => { switch (walletState.type) {
-    case 'disconnected' : return panesDisconnected 
-    case 'connecting'   : return panesConnecting
+  const walletState = useWalletState();
+
+  switch (walletState.type) {
+    case 'disconnected' : return (<div><Tab panes={panesDisconnected} /></div>) 
+    case 'connecting'   : return (<div><Tab panes={panesConnecting} /></div>) 
     case 'connected'    : 
-      return [
-                  { menuItem: <Menu.Item key='About'>About</Menu.Item>, render: () => <About/>},
-                  menuRequestedSwaps(requestedSwaps),
-                  { menuItem: <Menu.Item key='new'><Icon name='add circle' color='grey' size='large' /> New  </Menu.Item>,
-                    render: () => <NewSwap state={ (walletState as Connected)}/>}, 
-                  menuInitializedSwaps(initializedSwaps,walletState),
-                  menuProvisionnedSwaps(provisionnedSwaps),
-                  menuClosedSwaps (closedSwaps)
-                ]
-  }}  
-  useEffect(() => {
-    if(walletState.type == 'connected') {
-      fetchInitializedSwaps(walletState.swapServices) 
-       .then (setInitializedSwaps)
-    }
-    }
-    , [walletState.type,initializedSwaps.length]);
-  return (<div><Tab panes={panes()} /></div>)
+      const [usedInitializedSwaps, _]  = bind(walletState.swapServices.mySwaps.initialized,[]); 
+      return <ConnectedSwapTabs usedInitializedSwaps={usedInitializedSwaps} walletState={walletState}/>
+  }     
+} 
+
+export const ConnectedSwapTabs =  ({walletState, usedInitializedSwaps }: { usedInitializedSwaps,walletState : Connected }) => { 
+ 
+  const initializedSwaps = usedInitializedSwaps()
+  console.log("initializedSwaps", initializedSwaps)
+  const panes = [{ menuItem: <Menu.Item key='new'><Icon name='add circle' color='grey' size='large' /> New  </Menu.Item>,
+                render: () => <NewSwap state={ (walletState as Connected)}/>}, 
+              menuInitializedSwaps(initializedSwaps,walletState)]
+   
+  return (<div><Subscribe><Tab panes={panes} /></Subscribe></div>)
   
    
 } 
@@ -74,9 +66,9 @@ const menuClosedSwaps = (closedSwaps) => (closedSwaps.length !== 0 ) ? {} :
           ({ menuItem: <Menu.Item key='closed'>Closed<Label>{closedSwaps.length}</Label></Menu.Item>,
             render: () => <ClosedSwaps />,
            }) 
-const menuRequestedSwaps = (closedSwaps) => (closedSwaps.length !== 0 ) ? {} : 
-           ({ menuItem: <Menu.Item key='requested'>Requested<Label>{closedSwaps.length}</Label></Menu.Item>,
-             render: () => <RequestedSwaps />,
+const menuRequestedSwaps = (requestedSwaps:MySwap[],connected :Connected)  => (requestedSwaps.length !== 0 ) ? {} : 
+           ({ menuItem: <Menu.Item key='requested'>Requested<Label>{requestedSwaps.length}</Label></Menu.Item>,
+             render: () => <RequestedSwaps requestedSwaps={requestedSwaps} connectedExtension={connected} />,
             }) 
 const panesDisconnected = [{
       menuItem: <Menu.Item key='About'>About</Menu.Item>,

@@ -7117,10 +7117,10 @@ makeerror@1.0.12:
   dependencies:
     tmpl "1.0.5"
 
-marlowe-ts-sdk@0.0.35-beta:
-  version "0.0.35-beta"
-  resolved "https://registry.yarnpkg.com/marlowe-ts-sdk/-/marlowe-ts-sdk-0.0.35-beta.tgz#c8938752614a86a4c04da20e0cc11d5b2add0acf"
-  integrity sha512-QFvXmcyHjWMwZ8kSxNIKDFCabmdPtxuZ/K0qsRrWdQT+o9GEGfJSXYqdC9igUHIReX9wx+/7lob08DtDE//n6g==
+marlowe-ts-sdk@0.0.37-beta:
+  version "0.0.37-beta"
+  resolved "https://registry.yarnpkg.com/marlowe-ts-sdk/-/marlowe-ts-sdk-0.0.37-beta.tgz#1d752cd019e9915ab0b07fad30143a91c1f7eb31"
+  integrity sha512-InTT0a01uhavD+yOvbyF6KsHCs2bazUMsWeEUYoIZDX9CbwSqIQoJKSU6JgkXD6/dRVW8z1TKij52JMgsghT9g==
   dependencies:
     "@blockfrost/blockfrost-js" "5.2.0"
     "@blockfrost/openapi" "0.1.54"
@@ -8974,10 +8974,10 @@ run-parallel@^1.1.9:
   dependencies:
     queue-microtask "^1.2.2"
 
-rxjs@^7.8.0:
-  version "7.8.0"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.0.tgz#90a938862a82888ff4c7359811a595e14e1e09a4"
-  integrity sha512-F2+gxDshqmIub1KdvZkaEfGDwLNpPvk9Fs6LD/MyQxNgMds/WH9OdDDXOmxUZpME+iSK3rQCctkL0DYyytUqMg==
+rxjs@^7.8.1:
+  version "7.8.1"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.1.tgz#6f6f3d99ea8044291efd92e7c7fcf562c4057543"
+  integrity sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==
   dependencies:
     tslib "^2.1.0"
 
