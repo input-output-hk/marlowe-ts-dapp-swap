@@ -20,6 +20,7 @@ import { addressBech32 } from 'marlowe-ts-sdk/src/runtime/common/address'
 import { TokenValue,adaValue, tokenValue } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/tokenValue'
 import * as TV from  'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/tokenValue'
 import { Token, adaToken, token } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token'
+import { contractId } from 'marlowe-ts-sdk/src/runtime/contract/id'
 const findTokenValue = (tokenValues : TokenValue[]) => (token:Token) => 
   pipe(tokenValues
       , A.findFirst((w : TokenValue) => w.token === token)
@@ -54,7 +55,18 @@ export const NewSwap = ({state}) => {
   const submit = async (event) => {
     event.preventDefault();
     const {swapServices} = state
-
+    // await pipe
+    //   ( runtime.withdraw ( { contractId : contractId("ea3e08b09afabdb068782232501d3679c07f00302e31973b38297c2995d4626c#1"), role : "WithdrawalTest1"})
+          
+    //   , TE.match (
+    //       (error) => { console.log(error)
+    //                    setSubmitFailed(JSON.stringify(error))
+    //                    setSubmitSucceed('')},
+    //       () => 
+    //                  { 
+    //                    setSubmitSucceed('Successfully created your swap')
+    //                    setSubmitFailed('') })
+    //   )()
     await pipe
       ( swapServices.initialize
           (addressBech32 (swapperAddress) )

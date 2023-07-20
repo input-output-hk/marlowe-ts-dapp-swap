@@ -16,7 +16,7 @@ import { PolicyId } from 'marlowe-ts-sdk/src/runtime/common/policyId'
 import { toInput } from 'marlowe-ts-sdk/src/language/core/v1/semantics/next/applicables/canDeposit'
 import { Observable, distinctUntilChanged, from, interval, map, mergeMap, switchMap } from 'rxjs'
 import * as E from 'fp-ts/Either'
-export const runtimeUrl = 'http://0.0.0.0:33077'  
+export const runtimeUrl = 'http://0.0.0.0:33294'  
 export const dAppName = 'dApp.swap.L1.v1.3'
 
 
