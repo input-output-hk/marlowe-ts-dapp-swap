@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "type":"module",
   "dependencies": {
     "@meshsdk/core": "1.2.0-beta.4",
     "@meshsdk/react": "1.1.1",
@@ -21,13 +22,16 @@
     "@types/react-dom": "18.0.8",
     "date-fns": "2.29.3",
     "fp-ts": "^2.13.1",
-    "marlowe-ts-sdk": "0.0.37-beta",
+    "@marlowe.tmp/language-core-v1":"0.1.2-beta",
+    "@marlowe.tmp/legacy-adapter": "0.1.1-beta",
+    "@marlowe.tmp/legacy-runtime":"0.1.1-beta",
     "next": "13.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.43.9",
     "react-scripts": "^5.0.1",
     "rxjs": "^7.8.1",
+    "io-ts":"2.2.20",
     "semantic-ui-css": "^2.5.0",
     "semantic-ui-react": "^2.1.4"
   },

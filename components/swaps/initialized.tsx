@@ -1,20 +1,23 @@
 /* eslint-disable react/jsx-key */
-import { pipe } from 'fp-ts/lib/function';
-import { Connected } from 'components/hooks/Wallet';
-import React,  { useEffect, useState } from 'react'
-import * as A from 'fp-ts/Array'
+import { pipe } from 'fp-ts/lib/function.js';
+import { Connected } from 'components/hooks/Wallet.js';
+import React,  {  } from 'react'
 import { Button, Icon, Table } from 'semantic-ui-react'
-import { unContractId } from 'marlowe-ts-sdk/src/runtime/contract/id';
-import { Token } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token';
-import { MySwap } from './service';
-import { formatADAs } from 'components/common/tokens';
-import { timeoutToDate } from 'components/common/date';
+import { unContractId } from '@marlowe.tmp/legacy-runtime/contract/id';
+import { MySwap } from './service.js';
+import { formatADAs } from 'components/common/tokens.js';
+import { timeoutToDate } from 'components/common/date.js';
 import {format} from 'date-fns'
-import { unPolicyId } from 'marlowe-ts-sdk/src/runtime/common/policyId';
-import { TokenValue } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/tokenValue';
+// import { unPolicyId } from '@marlowe.tmp/legacy-runtime/common/';
+import { TokenValue } from '@marlowe.tmp/language-core-v1/tokenValue';
+import { unPolicyId } from '@marlowe.tmp/legacy-runtime/common/policyId';
+
+
+
 
 export const InitializedSwaps = ({initializedSwaps,connectedExtension }) => {
   console.log("initializedSwaps",initializedSwaps)
+  unPolicyId
   const {isMainnnet,swapServices} : Connected = connectedExtension
   return (<Table compact celled striped>
     <Table.Header>

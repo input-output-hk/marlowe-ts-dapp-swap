@@ -1,13 +1,6 @@
-import React,  { Component, useContext, useEffect, useReducer, useState } from 'react'
-import { Container, Dropdown, Icon, Input, Label, Loader, Menu } from 'semantic-ui-react'
-import  Logo  from './marlowe-logo.svg'
-import * as A from 'fp-ts/Array'
-import * as T from 'fp-ts/Task'
-import * as O from 'fp-ts/Option'
-import { CardanoWallet, WalletContext, useLovelace, useNetwork, useWallet, useWalletList,  } from '@meshsdk/react'
+import React,  {  } from 'react'
 
-import { Button, Checkbox, Table } from 'semantic-ui-react'
-import { Segment, Tab } from 'semantic-ui-react'
+import { Button, Table } from 'semantic-ui-react'
 
 export const ClosedSwaps = () => (
   <Table compact celled striped>

@@ -1,11 +1,11 @@
-import Head from "next/head";
 
-import  { ConnectionWallet } from "../components/menu/Menu";
+
+import  { ConnectionWallet } from "../components/menu/Menu.js";
 import { Container, Grid, Menu } from "semantic-ui-react";
-import { SwapTabs } from "../components/swaps/tabs";
+import { SwapTabs } from "../components/swaps/tabs.jsx";
 import { Component, useState } from "react";
-import { RunLiteTabs } from "../components/runLite/tabs";
-import  Logo  from '../components/menu/marlowe-logo.svg'
+
+import { Image } from 'semantic-ui-react'
 
 export default function Home() {
 
@@ -15,17 +15,12 @@ export default function Home() {
   const { activeItem } = state
   return (
     <div className="container">
-      <Head>
-        <title>Marlowe Lab</title>
-        <meta name="description" content="A Cardano dApp powered my Marlowe" />
-
-      </Head>
       <main>
 
       <Container > 
         <Menu secondary>
           <Menu.Item>
-            <Logo />
+          <Image src='../components/menu/marlowe-logo.svg' alt=""/>
           </Menu.Item>
           <Menu.Item
                   name='My Swaps'
@@ -41,7 +36,7 @@ export default function Home() {
             <ConnectionWallet /> 
           </Menu.Menu>
         </Menu>
-        {activeItem === 'My Swaps' ? <SwapTabs/> : <RunLiteTabs/>}
+        <SwapTabs/> 
       </Container>
       
      

@@ -1,14 +1,14 @@
 import { useContext, useEffect, useState } from 'react'
-import * as A from 'fp-ts/Array'
+import * as A from 'fp-ts/lib/Array.js'
 
-import * as O from 'fp-ts/lib/Option';
+import * as O from 'fp-ts/lib/Option.js';
 import { WalletContext, useNetwork,  } from '@meshsdk/react'
 import { AssetExtended, BrowserWallet, resolveFingerprint } from '@meshsdk/core'
-import { constant, pipe } from 'fp-ts/lib/function'
-import { mkRuntimeCIP30 } from 'marlowe-ts-sdk/src/runtime/runtimeCIP30'
+import { constant, pipe } from 'fp-ts/lib/function.js'
 
-import { SwapServices, dAppName, runtimeUrl, swapServices } from 'components/swaps/service'
-import { Runtime } from 'marlowe-ts-sdk/src/runtime';
+import { SwapServices, dAppName, runtimeUrl, swapServices } from 'components/swaps/service.js'
+import { Runtime } from '@marlowe.tmp/legacy-runtime/runtime'
+import { mkRuntimeCIP30 } from '@marlowe.tmp/legacy-runtime/runtimeCIP30';
 
 export type BroswerExtensionDetails = {
     name: string,
@@ -49,7 +49,7 @@ export const useWalletState : () => WalletState =
     hasConnectedWallet,
     connectWallet,
     disconnect,
-  } = useContext(WalletContext);
+  } = useContext<WalletContext>(WalletContext);
   
   
   const isMainnnet = pipe(useNetwork (), a => a == 1 )
@@ -96,7 +96,7 @@ export const useRuntime = () => {
   const {
     connectedWalletName,
     hasConnectedWallet,
-  } = useContext(WalletContext);
+  } = useContext<WalletContext>(WalletContext);
 
   useEffect(() => {
     if (hasConnectedWallet) {
@@ -106,5 +106,7 @@ export const useRuntime = () => {
 
   return runtimeOption;
 };
+
+
 
 

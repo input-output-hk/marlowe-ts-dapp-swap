@@ -8,16 +8,16 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "module": "ES2020",
+    "moduleResolution": "Node16",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
     "baseUrl": ".",
-    "paths": {
-      "@runtime/*": ["/node_modules/marlowe-ts-sdk/src/runtime/*"]
-    }
+    // "paths": {
+    //   "@runtime/*": ["/node_modules/@marlowe.tmp/legacy-runtime/src/*"]
+    // }
 
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

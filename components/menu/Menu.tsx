@@ -1,13 +1,13 @@
 import React,  { Component, useEffect, useState } from 'react'
 import { Dropdown, Loader, Menu } from 'semantic-ui-react'
 
-import * as A from 'fp-ts/Array'
-import * as O from 'fp-ts/Option'
-import * as E from 'fp-ts/Either'
+import * as A from 'fp-ts/lib/Array.js'
+import * as O from 'fp-ts/lib/Option.js'
+import * as E from 'fp-ts/lib/Either.js'
 import { Image } from 'semantic-ui-react'
-import { pipe } from 'fp-ts/lib/function'
-import { Connected, useWalletState } from '../hooks/Wallet'
-import { formatADAs } from 'components/common/tokens'
+import { pipe } from 'fp-ts/lib/function.js'
+import { Connected, useWalletState } from '../hooks/Wallet.js'
+import { formatADAs } from 'components/common/tokens.js'
 
 
 

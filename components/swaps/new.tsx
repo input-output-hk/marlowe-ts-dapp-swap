@@ -1,4 +1,4 @@
-import { pipe } from 'fp-ts/lib/function'
+import { pipe } from 'fp-ts/lib/function.js'
 import React,  { useEffect, useState } from 'react'
 import { Message } from 'semantic-ui-react'
 import { addDays } from 'date-fns/fp'
@@ -8,19 +8,18 @@ import {
   Form,
   TextArea,
 } from 'semantic-ui-react'
-import { Connected } from '../hooks/Wallet'
-import * as A from 'fp-ts/Array'
-import * as TE from 'fp-ts/TaskEither'
-import * as O from 'fp-ts/Option'
-import { AssetExtended } from '@meshsdk/core'
-import * as E from 'fp-ts/Either'
-import { datetoTimeout } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/when'
+import { Connected } from '../hooks/Wallet.js'
+import * as A from 'fp-ts/lib/Array.js'
+import * as TE from 'fp-ts/lib/TaskEither.js'
+import * as O from 'fp-ts/lib/Option.js'
 
-import { addressBech32 } from 'marlowe-ts-sdk/src/runtime/common/address'
-import { TokenValue,adaValue, tokenValue } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/tokenValue'
-import * as TV from  'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/tokenValue'
-import { Token, adaToken, token } from 'marlowe-ts-sdk/src/language/core/v1/semantics/contract/common/token'
-import { contractId } from 'marlowe-ts-sdk/src/runtime/contract/id'
+import { addressBech32 } from '@marlowe.tmp/legacy-runtime/common/address'
+import { TokenValue,adaValue, tokenValue } from '@marlowe.tmp/language-core-v1/tokenValue'
+import * as TV from  '@marlowe.tmp/language-core-v1/tokenValue'
+import { Token, adaToken, token } from '@marlowe.tmp/language-core-v1/token'
+import { datetoTimeout } from '@marlowe.tmp/language-core-v1'
+
+
 const findTokenValue = (tokenValues : TokenValue[]) => (token:Token) => 
   pipe(tokenValues
       , A.findFirst((w : TokenValue) => w.token === token)
