@@ -1,12 +1,14 @@
 import { useContext, useEffect, useState } from 'react'
-import * as A from 'fp-ts/Array'
-import * as O from 'fp-ts/Option'
+import * as A from 'fp-ts/lib/Array.js'
+
+import * as O from 'fp-ts/lib/Option.js';
 import { WalletContext, useNetwork,  } from '@meshsdk/react'
 import { AssetExtended, BrowserWallet, resolveFingerprint } from '@meshsdk/core'
-import { constant, pipe } from 'fp-ts/lib/function'
-import {cip30SDK} from 'marlowe-ts-sdk/src/runtime/'
+import { constant, pipe } from 'fp-ts/lib/function.js'
 
-import { SwapServices, dappName, runtimeUrl, swapServices } from 'pages/Swaps/service'
+import { SwapServices, dAppName, runtimeUrl, swapServices } from 'components/swaps/service.js'
+import { Runtime } from '@marlowe.tmp/legacy-runtime/runtime'
+import { mkRuntimeCIP30 } from '@marlowe.tmp/legacy-runtime/runtimeCIP30';
 
 export type BroswerExtensionDetails = {
     name: string,
@@ -24,8 +26,8 @@ export type MeshExtensionSDK = BrowserWallet
 export type Connected = { type: 'connected',
                    isMainnnet : Boolean 
                    swapServices : SwapServices,
+                   runtime : Runtime,
                    meshExtensionSDK : MeshExtensionSDK
-                   assetBalances : AssetExtended[],
                    extensionSelectedDetails : BroswerExtensionDetails
                    disconnect : () => void
                  } 
@@ -47,22 +49,27 @@ export const useWalletState : () => WalletState =
     hasConnectedWallet,
     connectWallet,
     disconnect,
-  } = useContext(WalletContext);
+  } = useContext<WalletContext>(WalletContext);
   
   
   const isMainnnet = pipe(useNetwork (), a => a == 1 )
   const installedExtensions = useInstalledWalletExtensions ()
-  const assetBalances = useAssetBalance()
-        
+  const runtimeOpt = useRuntime()     
   const connectOption 
     = pipe(  O.Do
           ,  O.bind ( 'extensionSelectedDetails' ,  () => pipe (installedExtensions, A.findFirst(w => w.name == connectedWalletName)))
-          ,  O.map (({extensionSelectedDetails}) => ({ type : 'connected' 
+          ,  O.bind ( 'runtime' ,  () => runtimeOpt)
+          ,  O.map (({extensionSelectedDetails,runtime}) => ({ type : 'connected' 
                                       , isMainnnet : isMainnnet
-                                      , swapServices : swapServices(cip30SDK(runtimeUrl)(connectedWalletName))(dappName)
+                                      , swapServices : 
+                                          swapServices
+                                            (runtime)
+                                            (dAppName) 
+                                            ({ provider :"Provider NFT Handle"
+                                             , swapper : "Swapper NFT Handle" })
+                                      , runtime : runtime
                                       , meshExtensionSDK : connectedWalletInstance
                                       , extensionSelectedDetails : extensionSelectedDetails
-                                      , assetBalances : assetBalances
                                       , disconnect : disconnect} as WalletState)))
   const connecting   = constant ({ type: 'connecting' } as WalletState)
   const disconnected = constant ({ type: 'disconnected' , installedExtensions : installedExtensions , connect : connectWallet} as WalletState)
@@ -84,40 +91,22 @@ export const useInstalledWalletExtensions = () => {
   return wallets;
 };
 
-export const useAssetBalance = () => {
-  const [assets, setAssets] = useState<AssetExtended[]>([])
+export const useRuntime = () => {
+  const [runtimeOption, setRuntime] = useState<(O.Option<Runtime>)>(O.none)
   const {
+    connectedWalletName,
     hasConnectedWallet,
-    connectedWalletInstance,
-  } = useContext(WalletContext);
+  } = useContext<WalletContext>(WalletContext);
 
   useEffect(() => {
     if (hasConnectedWallet) {
-      getAssets(connectedWalletInstance).then(setAssets);
+      (mkRuntimeCIP30(runtimeUrl)(connectedWalletName)()).then((runtime) => setRuntime(O.some(runtime)))
     }
-  }, [hasConnectedWallet,connectedWalletInstance]);
+  }, [hasConnectedWallet,connectedWalletName]);
 
-  return assets;
+  return runtimeOption;
 };
 
-const getAssets = async (connectedWalletInstance :BrowserWallet) => {
-  const balance = await connectedWalletInstance.getBalance();
-  return balance
-    .map((v) => {
-      const policyId = v.unit.slice(0, POLICY_ID_LENGTH);
-      const assetName = v.unit.slice(POLICY_ID_LENGTH);
-      const fingerprint = resolveFingerprint(policyId, assetName);
 
-      return {
-        unit: v.unit,
-        policyId,
-        assetName: toUTF8(assetName),
-        fingerprint,
-        quantity: v.quantity
-      };
-    });
-}
-const POLICY_ID_LENGTH = 56;
-const toUTF8 = (hex: string) => Buffer.from(hex, 'hex').toString('utf-8');
 
 

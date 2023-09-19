@@ -1,35 +1,14 @@
-import React,  { Component } from 'react'
+import React,  { Component, useEffect, useState } from 'react'
 import { Dropdown, Loader, Menu } from 'semantic-ui-react'
-import  Logo  from './marlowe-logo.svg'
-import * as A from 'fp-ts/Array'
-import * as O from 'fp-ts/Option'
 
+import * as A from 'fp-ts/lib/Array.js'
+import * as O from 'fp-ts/lib/Option.js'
+import * as E from 'fp-ts/lib/Either.js'
 import { Image } from 'semantic-ui-react'
-import { pipe } from 'fp-ts/lib/function'
-import { Connected, useWalletState } from '../Hooks/Wallet'
+import { pipe } from 'fp-ts/lib/function.js'
+import { Connected, useWalletState } from '../hooks/Wallet.js'
+import { formatADAs } from 'components/common/tokens.js'
 
-
-export default class MyMenu extends Component {
-  state = { activeItem: 'home' }
-
-  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
-
-  render() {
-    const { activeItem } = this.state
-    console.log("Render Menu" )
-    return (
-      <Menu secondary>
-        <Menu.Item>
-          <Logo />
-        </Menu.Item>
-        <Menu.Item> <h3>P2P Swaps </h3></Menu.Item>
-        <Menu.Menu position='right'>
-          <ConnectionWallet /> 
-        </Menu.Menu>
-      </Menu>
-    )
-  }
-}
 
 
 export const ConnectionWallet = () => {
@@ -73,22 +52,22 @@ export const ConnectWallet = ({ state }) => {
 
 export const ConnectedWallet = ({state}) => {
   const connected : Connected = state
-  const { disconnect, extensionSelectedDetails , assetBalances , isMainnnet} = connected;
+  const { disconnect, extensionSelectedDetails , runtime , isMainnnet} = connected;
   console.log('state' , state)
-  const lovelaceBalance = 
-      pipe(assetBalances 
-          ,A.findFirst((v) => v.unit === 'lovelace') 
-          ,O.map((v) => parseInt (v.quantity,10))
-          ,O.getOrElse(() => 0))
+  const [lovelaceBalance, setLovelaceBalance] = useState<bigint>(0n)
+  console.log('lovelaceBalance' , lovelaceBalance)
+  useEffect(() => {
+    (runtime.wallet.getLovelaces()).then((result) => pipe(result,E.getOrElse(() => 0n),setLovelaceBalance))
+  }, [runtime]);
 
-  const adas = (Math.trunc(lovelaceBalance / 1_000_000))
-  const decimalADAs = (lovelaceBalance % 1_000_000)
+  const [adas,decimalADAs,currrency] = formatADAs (lovelaceBalance, isMainnnet)
+  
   return  lovelaceBalance > 0 ? (
     <Dropdown
       trigger = {<><span className='small'><Image src={extensionSelectedDetails.icon} className="walletIcon" alt="" 
                     />{(adas).toString()}.</span>
                      <span  style={{fontSize: "smaller"}}>{decimalADAs + ' '} </span> 
-                     <span  style={{fontWeight: 'bold',fontSize: "smaller"}}> {isMainnnet ? ' ₳' : ' t₳' }</span>
+                     <span  style={{fontWeight: 'bold',fontSize: "smaller"}}> {' ' + currrency}</span>
                 </>}
       item
       className='icon'>
@@ -102,7 +81,7 @@ export const ConnectedWallet = ({state}) => {
   ) : (
     <Dropdown
       trigger = {<><span className='small'><Image src={extensionSelectedDetails.icon}  className="walletIcon" alt="" 
-                    />0 {isMainnnet ? ' ₳ ' : ' t₳'}</span>
+                    />0 {' ' + currrency}</span>
                 </>}
       item
       className='icon'>

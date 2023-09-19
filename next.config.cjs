@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['marlowe-ts-sdk'],
+  // transpilePackages: ['marlowe-ts-sdk'],
   reactStrictMode: false,
   webpack: function (config, options) {
     config.experiments = {
