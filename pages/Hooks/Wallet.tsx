@@ -4,7 +4,7 @@ import * as O from 'fp-ts/Option'
 import { WalletContext, useNetwork,  } from '@meshsdk/react'
 import { AssetExtended, BrowserWallet, resolveFingerprint } from '@meshsdk/core'
 import { constant, pipe } from 'fp-ts/lib/function'
-import {cip30SDK} from 'marlowe-ts-sdk/src/runtime/'
+import {SDK, cip30SDK} from 'marlowe-ts-sdk/src/runtime/'
 
 import { SwapServices, dappName, runtimeUrl, swapServices } from 'pages/Swaps/service'
 
@@ -24,6 +24,7 @@ export type MeshExtensionSDK = BrowserWallet
 export type Connected = { type: 'connected',
                    isMainnnet : Boolean 
                    swapServices : SwapServices,
+                   marloweSDK : SDK,
                    meshExtensionSDK : MeshExtensionSDK
                    assetBalances : AssetExtended[],
                    extensionSelectedDetails : BroswerExtensionDetails
@@ -60,6 +61,7 @@ export const useWalletState : () => WalletState =
           ,  O.map (({extensionSelectedDetails}) => ({ type : 'connected' 
                                       , isMainnnet : isMainnnet
                                       , swapServices : swapServices(cip30SDK(runtimeUrl)(connectedWalletName))(dappName)
+                                      , marloweSDK : cip30SDK(runtimeUrl)(connectedWalletName)
                                       , meshExtensionSDK : connectedWalletInstance
                                       , extensionSelectedDetails : extensionSelectedDetails
                                       , assetBalances : assetBalances
